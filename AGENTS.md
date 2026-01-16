@@ -32,6 +32,7 @@ Working style
 - Keep outputs deterministic; use replayable event logs + snapshots.
 - Prefer simple, verifiable steps over broad refactors.
 - Use `scripts/check` before reporting a task as complete.
+- Use `scripts/install-hooks` once to enable repo hooks.
 
 Communication expectations
 - Confirm understanding when requirements shift.
