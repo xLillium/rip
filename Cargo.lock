@@ -1326,6 +1326,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rip-provider-openresponses"
+version = "0.1.0"
+dependencies = [
+ "rip-openresponses",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ripd"
 version = "0.1.0"
 dependencies = [

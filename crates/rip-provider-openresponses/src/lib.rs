@@ -1,0 +1,203 @@
+use serde_json::Value;
+
+use rip_openresponses::{validate_response_resource, validate_stream_event};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ParsedEventKind {
+    Done,
+    InvalidJson,
+    Event,
+}
+
+#[derive(Debug, Clone)]
+pub struct ParsedEvent {
+    pub kind: ParsedEventKind,
+    pub event: Option<String>,
+    pub raw: String,
+    pub data: Option<Value>,
+    pub errors: Vec<String>,
+    pub response_errors: Vec<String>,
+}
+
+impl ParsedEvent {
+    fn done(raw: String) -> Self {
+        Self {
+            kind: ParsedEventKind::Done,
+            event: None,
+            raw,
+            data: None,
+            errors: Vec::new(),
+            response_errors: Vec::new(),
+        }
+    }
+
+    fn invalid_json(raw: String, err: String, event: Option<String>) -> Self {
+        Self {
+            kind: ParsedEventKind::InvalidJson,
+            event,
+            raw,
+            data: None,
+            errors: vec![err],
+            response_errors: Vec::new(),
+        }
+    }
+
+    fn event(raw: String, event: Option<String>, data: Value) -> Self {
+        let mut errors = Vec::new();
+        if let Err(errs) = validate_stream_event(&data) {
+            errors.extend(errs);
+        }
+
+        if let Some(event_name) = event.as_ref() {
+            if let Some(type_name) = data.get("type").and_then(|v| v.as_str()) {
+                if event_name != type_name {
+                    errors.push(format!(
+                        "event name '{event_name}' does not match type '{type_name}'"
+                    ));
+                }
+            }
+        }
+
+        let mut response_errors = Vec::new();
+        if let Some(response) = data.get("response") {
+            if let Err(errs) = validate_response_resource(response) {
+                response_errors.extend(errs);
+            }
+        }
+
+        Self {
+            kind: ParsedEventKind::Event,
+            event,
+            raw,
+            data: Some(data),
+            errors,
+            response_errors,
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct SseDecoder {
+    buffer: String,
+    current_event: Option<String>,
+    current_data: Vec<String>,
+}
+
+impl SseDecoder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn push(&mut self, chunk: &str) -> Vec<ParsedEvent> {
+        self.buffer.push_str(chunk);
+        let mut events = Vec::new();
+        let mut lines = self.buffer.split('\n').peekable();
+        let mut pending_tail = None;
+
+        while let Some(line) = lines.next() {
+            let is_last = lines.peek().is_none();
+            if is_last && !self.buffer.ends_with('\n') {
+                pending_tail = Some(line.to_string());
+                break;
+            }
+
+            let line = line.trim_end_matches('\r');
+            if let Some(rest) = line.strip_prefix("event:") {
+                let value = rest.trim();
+                self.current_event = if value.is_empty() {
+                    None
+                } else {
+                    Some(value.to_string())
+                };
+            } else if let Some(rest) = line.strip_prefix("data:") {
+                let value = rest.trim_start();
+                self.current_data.push(value.to_string());
+            } else if line.is_empty() {
+                if is_last {
+                    pending_tail = Some(String::new());
+                    break;
+                }
+                if !self.current_data.is_empty() {
+                    let data = self.current_data.join("\n");
+                    let raw = data.clone();
+                    events.push(self.parse_event(raw));
+                    self.current_data.clear();
+                    self.current_event = None;
+                }
+            } else if line.starts_with(':') {
+                continue;
+            }
+        }
+
+        self.buffer = pending_tail.unwrap_or_default();
+        events
+    }
+
+    pub fn finish(&mut self) -> Vec<ParsedEvent> {
+        if self.buffer.is_empty() {
+            return Vec::new();
+        }
+        let chunk = format!("{}\n", self.buffer);
+        self.buffer.clear();
+        self.push(&chunk)
+    }
+
+    fn parse_event(&self, raw: String) -> ParsedEvent {
+        if raw == "[DONE]" {
+            return ParsedEvent::done(raw);
+        }
+
+        match serde_json::from_str::<Value>(&raw) {
+            Ok(value) => ParsedEvent::event(raw, self.current_event.clone(), value),
+            Err(err) => ParsedEvent::invalid_json(raw, err.to_string(), self.current_event.clone()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_done_sentinel() {
+        let mut decoder = SseDecoder::new();
+        let events = decoder.push("data: [DONE]\n\n");
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].kind, ParsedEventKind::Done);
+    }
+
+    #[test]
+    fn parses_invalid_json() {
+        let mut decoder = SseDecoder::new();
+        let events = decoder.push("data: {not json}\n\n");
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].kind, ParsedEventKind::InvalidJson);
+    }
+
+    #[test]
+    fn captures_event_name_mismatch() {
+        let mut decoder = SseDecoder::new();
+        let payload = "event: response.created\n\
+                      data: {\"type\":\"response.completed\",\"sequence_number\":1,\"response\":{}}\n\n";
+        let events = decoder.push(payload);
+        assert_eq!(events.len(), 1);
+        let event = &events[0];
+        assert_eq!(event.kind, ParsedEventKind::Event);
+        assert!(event
+            .errors
+            .iter()
+            .any(|e| e.contains("does not match type")));
+    }
+
+    #[test]
+    fn handles_split_chunks() {
+        let mut decoder = SseDecoder::new();
+        let part1 = "data: {\"type\":\"response.created\",\"sequence_number\":1,\n";
+        let part2 = "data: \"response\":{}}\n\n";
+        let mut events = decoder.push(part1);
+        assert!(events.is_empty());
+        events.extend(decoder.push(part2));
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].kind, ParsedEventKind::Event);
+    }
+}
