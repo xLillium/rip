@@ -4,9 +4,9 @@ use std::{collections::HashMap, convert::Infallible, net::SocketAddr, sync::Arc}
 
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
+    http::{header::CONTENT_TYPE, StatusCode},
     response::{sse::Event as SseEvent, IntoResponse, Sse},
-    routing::{get, post},
+    routing::get,
     Json, Router,
 };
 use futures_util::StreamExt;
@@ -18,6 +18,8 @@ use tokio::{
     sync::{broadcast, Mutex},
 };
 use tokio_stream::wrappers::BroadcastStream;
+use utoipa::{OpenApi, ToSchema};
+use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -26,6 +28,7 @@ struct AppState {
     event_log: Arc<EventLog>,
     snapshot_dir: Arc<std::path::PathBuf>,
     runtime: Arc<Runtime>,
+    openapi_json: Arc<String>,
 }
 
 #[derive(Clone)]
@@ -34,15 +37,23 @@ struct SessionHandle {
     events: Arc<Mutex<Vec<rip_kernel::Event>>>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
 struct SessionCreated {
     session_id: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 struct InputPayload {
     input: String,
 }
+
+#[derive(OpenApi)]
+#[openapi(info(
+    title = "RIP Agent Server",
+    description = "Agent session control plane (HTTP/SSE).",
+    version = "0.1.0"
+))]
+struct ApiDoc;
 
 #[tokio::main]
 async fn main() {
@@ -56,21 +67,41 @@ async fn main() {
 }
 
 fn build_app(data_dir: std::path::PathBuf) -> Router {
+    let (router, openapi_json) = build_openapi_router();
     let state = AppState {
         sessions: Arc::new(Mutex::new(HashMap::new())),
         event_log: Arc::new(EventLog::new(data_dir.join("events.jsonl")).expect("event log")),
         snapshot_dir: Arc::new(data_dir.join("snapshots")),
         runtime: Arc::new(Runtime::new()),
+        openapi_json: Arc::new(openapi_json),
     };
 
-    Router::new()
-        .route("/sessions", post(create_session))
-        .route("/sessions/:id/input", post(send_input))
-        .route("/sessions/:id/events", get(stream_events))
-        .route("/sessions/:id/cancel", post(cancel_session))
+    router
+        .route("/openapi.json", get(openapi_spec))
         .with_state(state)
 }
 
+fn build_openapi_router() -> (Router<AppState>, String) {
+    let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .routes(routes!(create_session))
+        .routes(routes!(send_input))
+        .routes(routes!(stream_events))
+        .routes(routes!(cancel_session))
+        .split_for_parts();
+    let json = api
+        .to_pretty_json()
+        .map(|value| format!("{value}\n"))
+        .expect("openapi json");
+    (router, json)
+}
+
+#[utoipa::path(
+    post,
+    path = "/sessions",
+    responses(
+        (status = 201, description = "Session created", body = SessionCreated)
+    )
+)]
 async fn create_session(State(state): State<AppState>) -> impl IntoResponse {
     let session_id = Uuid::new_v4().to_string();
     let (sender, _receiver) = broadcast::channel(128);
@@ -87,6 +118,18 @@ async fn create_session(State(state): State<AppState>) -> impl IntoResponse {
     (StatusCode::CREATED, Json(SessionCreated { session_id }))
 }
 
+#[utoipa::path(
+    post,
+    path = "/sessions/{id}/input",
+    params(
+        ("id" = String, Path, description = "Session id")
+    ),
+    request_body = InputPayload,
+    responses(
+        (status = 202, description = "Input accepted"),
+        (status = 404, description = "Session not found")
+    )
+)]
 async fn send_input(
     Path(session_id): Path<String>,
     State(state): State<AppState>,
@@ -128,6 +171,17 @@ async fn send_input(
     StatusCode::ACCEPTED.into_response()
 }
 
+#[utoipa::path(
+    get,
+    path = "/sessions/{id}/events",
+    params(
+        ("id" = String, Path, description = "Session id")
+    ),
+    responses(
+        (status = 200, description = "SSE stream of event frames"),
+        (status = 404, description = "Session not found")
+    )
+)]
 async fn stream_events(
     Path(session_id): Path<String>,
     State(state): State<AppState>,
@@ -158,6 +212,17 @@ async fn stream_events(
         .into_response()
 }
 
+#[utoipa::path(
+    post,
+    path = "/sessions/{id}/cancel",
+    params(
+        ("id" = String, Path, description = "Session id")
+    ),
+    responses(
+        (status = 204, description = "Session canceled"),
+        (status = 404, description = "Session not found")
+    )
+)]
 async fn cancel_session(
     Path(session_id): Path<String>,
     State(state): State<AppState>,
@@ -168,6 +233,14 @@ async fn cancel_session(
     } else {
         StatusCode::NOT_FOUND
     }
+}
+
+async fn openapi_spec(State(state): State<AppState>) -> impl IntoResponse {
+    (
+        StatusCode::OK,
+        [(CONTENT_TYPE, "application/json")],
+        state.openapi_json.as_str().to_owned(),
+    )
 }
 
 fn data_dir() -> std::path::PathBuf {
@@ -183,6 +256,7 @@ mod tests {
     use axum::body::Body;
     use axum::http::Request;
     use http_body_util::BodyExt;
+    use std::path::PathBuf;
     use tempfile::tempdir;
     use tokio::time::{sleep, timeout, Duration};
     use tower::util::ServiceExt;
@@ -208,6 +282,55 @@ mod tests {
             .to_bytes();
         let payload: SessionCreated = serde_json::from_slice(&body).expect("json");
         payload.session_id
+    }
+
+    #[tokio::test]
+    async fn openapi_spec_served() {
+        let dir = tempdir().expect("tmp");
+        let app = build_app(dir.path().join("data"));
+
+        let response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("GET")
+                    .uri("/openapi.json")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .expect("response");
+
+        assert_eq!(response.status(), StatusCode::OK);
+        let content_type = response
+            .headers()
+            .get("content-type")
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or("");
+        assert!(content_type.starts_with("application/json"));
+        let body = response.into_body().collect().await.expect("body");
+        let bytes = body.to_bytes();
+        let value: serde_json::Value = serde_json::from_slice(&bytes).expect("json");
+        assert!(value
+            .get("paths")
+            .and_then(|paths| paths.get("/sessions"))
+            .is_some());
+    }
+
+    #[test]
+    fn openapi_snapshot_matches() {
+        let json = build_openapi_router().1;
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..");
+        let path = root.join("schemas/ripd/openapi.json");
+        if std::env::var("RIPD_UPDATE_OPENAPI").is_ok() {
+            std::fs::create_dir_all(path.parent().expect("dir")).expect("mkdir");
+            std::fs::write(&path, json).expect("write");
+            return;
+        }
+        let existing = std::fs::read_to_string(&path).expect("snapshot missing");
+        assert_eq!(existing, json);
     }
 
     #[tokio::test]

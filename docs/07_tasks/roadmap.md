@@ -13,10 +13,6 @@ How to use
 - Date-stamp moves between Now/Next/Later to preserve intent over time.
 
 Now
-- Server OpenAPI spec generation + schema snapshot [needs work]
-  - Refs: `docs/03_contracts/modules/phase-1/06_server.md`, `docs/04_execution/server.md`, `docs/02_architecture/component_map.md`
-  - Ready: pick OpenAPI generator crate; decide schema output path
-  - Done: `/openapi.json` served; canonical snapshot in `schemas/`; capability registry alignment checks; validation test in CI
 - CLI interactive renderer + approvals/diffs UI surface [needs work]
   - Refs: `docs/07_tasks/phase-1/06_cli.md`, `docs/03_contracts/modules/phase-1/05_cli.md`, `docs/04_execution/cli.md`
   - Ready: event frame schema final; approval UX spec confirmed
@@ -84,7 +80,6 @@ Doc/impl gaps
 - Interactive CLI is specified but not implemented (see `docs/07_tasks/phase-1/06_cli.md`).
 - TUI surface is documented but not implemented (`rip-tui`).
 - MCP surface is documented but deferred to Phase 2 (`rip-mcp`).
-- Server OpenAPI spec generation is required but not implemented.
 - Surface parity matrix/gap list not generated from registry.
 - Tool runtime not yet integrated into session execution.
 - Benchmarks are required by docs but no harness exists.
@@ -98,6 +93,7 @@ Open questions
 - (empty)
 
 Done (recent)
+- 2026-01-16: Server OpenAPI spec generation + schema snapshot.
 - 2026-01-16: Server SSE compliance tests + session lifecycle integration.
 - 2026-01-16: Tool runtime emits structured tool events with limits + tests.
 - 2026-01-16: Provider adapter emits full provider_event frames + fixtures/tests.
