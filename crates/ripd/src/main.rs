@@ -374,6 +374,157 @@ mod tests {
         assert!(payload.contains("\"type\""));
     }
 
+    #[tokio::test]
+    async fn stream_events_sse_compliance() {
+        let dir = tempdir().expect("tmp");
+        let app = build_app(dir.path().join("data"));
+        let session_id = create_session_id(&app).await;
+
+        let response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("GET")
+                    .uri(format!("/sessions/{session_id}/events"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .expect("response");
+        assert_eq!(response.status(), StatusCode::OK);
+        let content_type = response
+            .headers()
+            .get("content-type")
+            .and_then(|value| value.to_str().ok())
+            .unwrap_or("");
+        assert!(content_type.starts_with("text/event-stream"));
+        let mut reader = TestSseReader::new(response.into_body());
+
+        let send_response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri(format!("/sessions/{session_id}/input"))
+                    .header("content-type", "application/json")
+                    .body(Body::from("{\"input\":\"hi\"}"))
+                    .unwrap(),
+            )
+            .await
+            .expect("response");
+        assert_eq!(send_response.status(), StatusCode::ACCEPTED);
+
+        let message = reader.next_data_message().await.expect("message");
+        let data_line = message
+            .lines()
+            .find(|line| line.starts_with("data:"))
+            .expect("data line");
+        let json = data_line.trim_start_matches("data:").trim();
+        let value: serde_json::Value = serde_json::from_str(json).expect("json");
+        assert!(value.get("type").is_some());
+
+        for line in message.lines() {
+            assert!(line.starts_with("data:") || line.starts_with("event:"));
+        }
+    }
+
+    #[tokio::test]
+    async fn stream_events_preserves_order() {
+        let dir = tempdir().expect("tmp");
+        let app = build_app(dir.path().join("data"));
+        let session_id = create_session_id(&app).await;
+
+        let response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("GET")
+                    .uri(format!("/sessions/{session_id}/events"))
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .expect("response");
+        assert_eq!(response.status(), StatusCode::OK);
+        let mut reader = TestSseReader::new(response.into_body());
+
+        let send_response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri(format!("/sessions/{session_id}/input"))
+                    .header("content-type", "application/json")
+                    .body(Body::from("{\"input\":\"hi\"}"))
+                    .unwrap(),
+            )
+            .await
+            .expect("response");
+        assert_eq!(send_response.status(), StatusCode::ACCEPTED);
+
+        let first = reader.next_data_message().await.expect("first");
+        let second = reader.next_data_message().await.expect("second");
+        let first_value = extract_data_json(&first).expect("json");
+        let second_value = extract_data_json(&second).expect("json");
+        let first_seq = first_value
+            .get("seq")
+            .and_then(|value| value.as_u64())
+            .expect("seq");
+        let second_seq = second_value
+            .get("seq")
+            .and_then(|value| value.as_u64())
+            .expect("seq");
+        assert!(second_seq > first_seq);
+    }
+
+    struct TestSseReader {
+        body: Body,
+        buffer: String,
+    }
+
+    impl TestSseReader {
+        fn new(body: Body) -> Self {
+            Self {
+                body,
+                buffer: String::new(),
+            }
+        }
+
+        async fn next_data_message(&mut self) -> Option<String> {
+            loop {
+                if let Some((message, remainder)) = split_sse_message(&self.buffer) {
+                    self.buffer = remainder;
+                    if message.lines().any(|line| line.starts_with("data:")) {
+                        return Some(message);
+                    }
+                }
+
+                let frame = match timeout(Duration::from_secs(1), self.body.frame()).await {
+                    Ok(Some(Ok(frame))) => frame,
+                    Ok(Some(Err(_))) => return None,
+                    Ok(None) => return None,
+                    Err(_) => return None,
+                };
+                if let Ok(data) = frame.into_data() {
+                    let payload = String::from_utf8_lossy(&data).to_string();
+                    self.buffer.push_str(&payload);
+                }
+            }
+        }
+    }
+
+    fn split_sse_message(buffer: &str) -> Option<(String, String)> {
+        buffer.find("\n\n").map(|idx| {
+            let message = buffer[..idx].to_string();
+            let remainder = buffer[idx + 2..].to_string();
+            (message, remainder)
+        })
+    }
+
+    fn extract_data_json(message: &str) -> Option<serde_json::Value> {
+        let data_line = message.lines().find(|line| line.starts_with("data:"))?;
+        let json = data_line.trim_start_matches("data:").trim();
+        serde_json::from_str(json).ok()
+    }
+
     #[test]
     fn data_dir_prefers_env_var() {
         let dir = tempdir().expect("tmp");

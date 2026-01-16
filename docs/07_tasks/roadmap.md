@@ -19,10 +19,6 @@ Next
   - Refs: `docs/07_tasks/phase-1/06_cli.md`, `docs/03_contracts/modules/phase-1/05_cli.md`, `docs/04_execution/cli.md`
   - Ready: event frame schema final; approval UX spec confirmed
   - Done: interactive UI renders streams + approvals, golden render tests
-- Server SSE compliance tests + session lifecycle integration [confirm spec]
-  - Refs: `docs/07_tasks/phase-1/07_server.md`, `docs/03_contracts/modules/phase-1/06_server.md`
-  - Ready: event stream contract stable
-  - Done: SSE compliance tests + lifecycle integration tests
 - Workspace engine: checkpoint + rewind hooks integration in runtime [needs work]
   - Refs: `docs/07_tasks/phase-1/04_workspace_engine.md`, `docs/03_contracts/modules/phase-1/04_workspace_engine.md`
   - Ready: hook points in runtime defined; checkpoint event frames defined
@@ -56,6 +52,7 @@ Open questions
 - (empty)
 
 Done (recent)
+- 2026-01-16: Server SSE compliance tests + session lifecycle integration.
 - 2026-01-16: Tool runtime emits structured tool events with limits + tests.
 - 2026-01-16: Provider adapter emits full provider_event frames + fixtures/tests.
 - 2026-01-16: Event log replay equivalence + corruption detection tests.
