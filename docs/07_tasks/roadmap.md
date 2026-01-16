@@ -16,6 +16,7 @@ Now
   - Refs: `docs/07_tasks/phase-1/02_provider_adapter.md`, `docs/03_contracts/modules/phase-1/02_provider_adapters.md`
   - Ready: internal frame schema decided (above); OpenAPI schema synced
   - Done: SSE decoder maps to frames, validates `type` + response schema, acceptance fixtures + golden stream replay pass
+  - Progress: mapping + unit tests done; fixtures pending
 - Event log replay -> snapshot equivalence + corruption detection [confirm spec]
   - Refs: `docs/07_tasks/phase-1/05_event_log.md`, `docs/03_contracts/modules/phase-1/07_event_log.md`
   - Ready: frame schema stable; snapshot format confirmed

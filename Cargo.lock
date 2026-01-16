@@ -1893,9 +1893,11 @@ dependencies = [
 name = "rip-provider-openresponses"
 version = "0.1.0"
 dependencies = [
+ "rip-kernel",
  "rip-openresponses",
  "serde",
  "serde_json",
+ "uuid",
 ]
 
 [[package]]

@@ -25,6 +25,11 @@ Invariants
 - Preserve event order and timestamps.
 - No transformation that loses semantic meaning.
 
+Phase 1 mapping
+- `response.output_text.delta` -> `output_text_delta`.
+- `response.completed` / `response.failed` / `response.incomplete` / `[DONE]` -> `session_ended`.
+- All other events are validated and ignored (Phase 1).
+
 Tests
 - Acceptance fixtures against Open Responses schema.
 - Golden stream replay vs expected internal frames.
