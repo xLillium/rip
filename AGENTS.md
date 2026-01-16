@@ -61,3 +61,4 @@ Decision log
 
 Maintenance
 - AGENTS.md must be kept current as the system evolves; update it whenever intent, scope, or architecture changes.
+- Research artifacts live in `temp/docs`, with an index at `temp/docs/references.md`.
