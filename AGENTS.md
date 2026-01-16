@@ -49,6 +49,12 @@ Working style
 - Sync the canonical Open Responses OpenAPI spec via `scripts/update-openresponses-types` when schemas change.
 - Pre-commit runs `scripts/check-fast` (core checks + udeps); ensure required cargo subcommands are installed.
 
+Roadmap discipline
+- Maintain `docs/07_tasks/roadmap.md` as the single source for Now/Next/Later.
+- Every roadmap item must include a confidence tag: `[confirm spec]` or `[needs work]`.
+- If `[needs work]`, stop and ask for operator direction before implementation.
+- Record deferrals and doc/impl gaps in the roadmap so "now vs later" is explicit.
+
 Communication expectations
 - Confirm understanding when requirements shift.
 - Surface risks and tradeoffs early.
@@ -76,3 +82,4 @@ Decision log
 Maintenance
 - AGENTS.md must be kept current as the system evolves; update it whenever intent, scope, or architecture changes.
 - Research artifacts live in `temp/docs`, with an index at `temp/docs/references.md`.
+- Doc drift is a defect: if you notice docs diverging from each other or the implementation, fix it in the same change. If the fix is non-trivial, flag it and get approval before proceeding.

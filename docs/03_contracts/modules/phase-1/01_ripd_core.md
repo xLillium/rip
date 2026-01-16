@@ -10,7 +10,7 @@ Inputs
 - Tool outputs (via tool runtime).
 
 Outputs
-- Structured event stream for UI/SDK.
+- Structured event stream for UI/SDK (event frames: `docs/03_contracts/event_frames.md`).
 - Updates to event log + snapshots.
 - Tool invocations to tool runtime.
 

@@ -40,6 +40,7 @@ Configuration & Policy
 - Output style and model defaults configurable per scope.
 - Plugin, tool, and subagent configuration stored in config.
 - Managed policies to restrict plugins, hooks, and marketplaces.
+- Enterprise scopes with audit logging and managed policy enforcement.
 
 Commands & Automation
 - Slash commands for common actions (session control, model selection, permissions).
@@ -84,6 +85,10 @@ Compaction & Summarization
 - Branch summarization when navigating session tree.
 - File-operation tracking included in summaries.
 - Hook-based custom compaction and custom branch summaries.
+
+Policy & Steering
+- Adaptive budget controls (tokens, tool calls, time).
+- Runtime rule engine for policy decisions and guardrails.
 
 Extensions & Hooks
 - Lifecycle hooks (session start, tool call, agent end, etc.).
@@ -169,6 +174,10 @@ Integrations
 - Programmatic SDK to start/resume sessions and stream events.
 - TUI can attach to an existing server instance.
 
+Background Workers
+- Sync, analytics, cache warmers, and index builders.
+- Scheduled maintenance tasks (cleanup, compaction, pruning).
+
 Checkpointing & Rewind
 - Automatic checkpoints for tool-based file edits.
 - Rewind conversation and workspace state to a checkpoint.
@@ -179,3 +188,4 @@ Security & Safety
 - Secret redaction in logs/outputs where applicable.
 - Permission policy engine (allow/ask/reject/delegate).
 - Loop detection to stop repeated identical tool calls.
+- Per-tool isolation and resource limits for high-risk execution.

@@ -16,5 +16,5 @@ Format (per entry)
 Registry
 - session.create (v1)
 - session.send_input (v1)
-- session.stream_events (v1)
+- session.stream_events (v1) -> outputs event frames (`docs/03_contracts/event_frames.md`)
 - session.cancel (v1)

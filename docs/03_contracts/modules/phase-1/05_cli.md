@@ -9,7 +9,7 @@ Inputs
 - Agent event stream from ripd.
 
 Outputs
-- Rendered UI (interactive) or JSON stream (headless).
+- Rendered UI (interactive) or JSON stream of event frames (headless).
 - Control commands to ripd (cancel, approve, resume).
 
 Config

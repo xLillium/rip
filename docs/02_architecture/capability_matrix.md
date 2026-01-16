@@ -9,6 +9,7 @@ Phase 1 — Foundation
 - Session storage & replay: append-only log + snapshot reader; hook: replay reader for deterministic tests.
 - Configuration & policy: layered config loader + permission engine; hook: policy evaluation in tool runtime.
 - Execution modes: interactive CLI, headless CLI, RPC, JSONL output + JSON Schema; hook: output renderer + RPC mux.
+- Models & providers: multi-provider routing + model registry; hook: provider adapter boundary + model selector.
 - Tools & tooling: tool registry, allowlist, sandbox policy; hook: tool dispatch pipeline.
 - Hooks (minimal): session-level hook engine; hook: session lifecycle events.
 - Commands (core): in-memory command registry; hook: CLI/router integration.
@@ -21,8 +22,11 @@ Phase 2 — Expansion
 - Skills: SKILL discovery + on-demand loader + skill-scoped hooks; hook: context compiler.
 - Subagents: subagent manager + budgets + tool caps; hook: task scheduler.
 - Output styles: style registry + command selector; hook: response renderer.
+- UI/interaction: interactive affordances (palette, editor, shortcuts); hook: CLI/TUI UI layer.
 - Commands & automation: disk-based command loaders + hookable commands; hook: CLI command router.
 - Integrations: MCP client/server, remote tools, IDE adapters, LSP; hook: tool runtime + server API.
+- Context & guidance: project guidance loader + prompt scoping; hook: context compiler.
+- Compaction & summarization: auto/manual compaction + branch summaries; hook: context compiler + event log.
 - Context compiler: deterministic packing + summaries; hook: prompt assembly pipeline.
 
 Phase 3 — Advanced

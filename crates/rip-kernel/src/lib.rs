@@ -23,8 +23,8 @@ pub struct Event {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum EventKind {
-    SessionStarted,
-    Output { content: String },
+    SessionStarted { input: String },
+    OutputTextDelta { delta: String },
     SessionEnded { reason: String },
 }
 
@@ -115,11 +115,16 @@ impl Session {
 
     pub fn next_event(&mut self) -> Option<Event> {
         let (next_stage, kind) = match self.stage {
-            Stage::Start => (Stage::Output, EventKind::SessionStarted),
+            Stage::Start => (
+                Stage::Output,
+                EventKind::SessionStarted {
+                    input: self.input.clone(),
+                },
+            ),
             Stage::Output => (
                 Stage::End,
-                EventKind::Output {
-                    content: format!("ack: {}", self.input),
+                EventKind::OutputTextDelta {
+                    delta: format!("ack: {}", self.input),
                 },
             ),
             Stage::End => (
@@ -143,13 +148,13 @@ impl Session {
         };
 
         let hook_event = match &event.kind {
-            EventKind::SessionStarted => HookEventKind::SessionStarted,
-            EventKind::Output { .. } => HookEventKind::Output,
+            EventKind::SessionStarted { .. } => HookEventKind::SessionStarted,
+            EventKind::OutputTextDelta { .. } => HookEventKind::Output,
             EventKind::SessionEnded { .. } => HookEventKind::SessionEnded,
         };
 
         let output = match &event.kind {
-            EventKind::Output { content } => Some(content.clone()),
+            EventKind::OutputTextDelta { delta } => Some(delta.clone()),
             _ => None,
         };
 
@@ -208,8 +213,8 @@ mod tests {
         assert_eq!(events[1].seq, 1);
         assert_eq!(events[2].seq, 2);
 
-        matches!(events[0].kind, EventKind::SessionStarted);
-        matches!(events[1].kind, EventKind::Output { .. });
+        matches!(events[0].kind, EventKind::SessionStarted { .. });
+        matches!(events[1].kind, EventKind::OutputTextDelta { .. });
         matches!(events[2].kind, EventKind::SessionEnded { .. });
     }
 
@@ -220,6 +225,18 @@ mod tests {
         let event = session.next_event().expect("event");
         let json = serde_json::to_string(&event).expect("json");
         assert!(json.contains("session_started"));
+        assert!(json.contains("input"));
+    }
+
+    #[test]
+    fn session_started_includes_input() {
+        let runtime = Runtime::new();
+        let mut session = runtime.start_session("hello".to_string());
+        let event = session.next_event().expect("event");
+        match event.kind {
+            EventKind::SessionStarted { input } => assert_eq!(input, "hello"),
+            _ => panic!("expected session_started"),
+        }
     }
 
     #[test]
@@ -238,7 +255,7 @@ mod tests {
         }
 
         assert_eq!(events.len(), 2);
-        matches!(events[0].kind, EventKind::SessionStarted);
+        matches!(events[0].kind, EventKind::SessionStarted { .. });
         matches!(events[1].kind, EventKind::SessionEnded { .. });
     }
 

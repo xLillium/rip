@@ -5,7 +5,7 @@ Summary
 - Snapshots provide fast reads and deterministic replay.
 
 Inputs
-- Structured events from ripd.
+- Structured event frames from ripd (`docs/03_contracts/event_frames.md`).
 
 Outputs
 - Replay streams and snapshots.

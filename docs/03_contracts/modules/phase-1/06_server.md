@@ -8,7 +8,7 @@ Inputs
 - Session lifecycle requests (start, send input, cancel).
 
 Outputs
-- Structured event stream over SSE.
+- Structured event stream over SSE (event frames: `docs/03_contracts/event_frames.md`).
 - Session status and artifacts.
 
 Config

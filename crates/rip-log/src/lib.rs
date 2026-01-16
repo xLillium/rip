@@ -86,7 +86,7 @@ mod tests {
 
         let events = log.replay().expect("replay");
         assert_eq!(events.len(), 3);
-        matches!(events[0].kind, EventKind::SessionStarted);
+        matches!(events[0].kind, EventKind::SessionStarted { .. });
     }
 
     #[test]

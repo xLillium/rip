@@ -10,7 +10,7 @@ Interactive mode (draft)
 
 Headless mode (draft)
 - rip run <task> --headless --json
-- emits newline-delimited JSON events
+- emits newline-delimited JSON event frames
 
 Notes
 - CLI is a thin UI over ripd.

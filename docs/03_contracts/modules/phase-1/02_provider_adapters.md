@@ -10,7 +10,7 @@ Inputs
 - Internal request frames (model, instructions, tools, context).
 
 Outputs
-- Internal event frames mapped from provider SSE events.
+- Internal event frames mapped from provider SSE events (`docs/03_contracts/event_frames.md`).
 - Streaming event `type` validation against Open Responses schema-derived list.
 - Full streaming event and response validation against OpenAPI JSON schemas.
 

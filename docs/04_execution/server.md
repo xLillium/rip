@@ -12,3 +12,4 @@ Session lifecycle (draft)
 
 Notes
 - Server is optional; CLI can talk directly to ripd.
+- SSE stream emits JSON event frames (`docs/03_contracts/event_frames.md`).

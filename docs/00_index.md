@@ -12,6 +12,7 @@ Navigation
 - Capability matrix (phases + hook points): docs/02_architecture/capability_matrix.md
 - Surface layers + parity rules: docs/02_architecture/surfaces.md
 - Module contracts (Phase 1): docs/03_contracts/modules/phase-1/
+- Event frame schema: docs/03_contracts/event_frames.md
 - Capability contract + registry: docs/03_contracts/capabilities.md
 - Capability registry (source of truth): docs/03_contracts/capability_registry.md
 - CLI and server usage model: docs/04_execution/
