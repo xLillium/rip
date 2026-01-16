@@ -27,10 +27,10 @@ Next
   - Refs: `docs/07_tasks/phase-1/04_workspace_engine.md`, `docs/03_contracts/modules/phase-1/04_workspace_engine.md`
   - Ready: hook points in runtime defined; checkpoint event frames defined
   - Done: runtime integration + rewind behavior tests
-- Capability registry expansion + surface support matrix [needs work]
-  - Refs: `docs/03_contracts/capability_registry.md`, `docs/03_contracts/capabilities.md`, `docs/02_architecture/capability_baseline.md`
-  - Ready: capability ids grouped by baseline category; surface support fields defined
-  - Done: registry enumerates baseline capabilities + surface support; parity gaps tracked
+- Surface parity matrix + gap list enforcement [needs work]
+  - Refs: `docs/05_quality/surface-parity.md`, `docs/03_contracts/capability_registry.md`
+  - Ready: registry expanded with baseline capabilities and surface support fields
+  - Done: parity matrix generated; gap list maintained with approvals; CI gate enforced
 - Headless CLI JSON validation [needs work]
   - Refs: `docs/03_contracts/modules/phase-1/05_cli.md`, `docs/04_execution/cli.md`
   - Ready: event frame schema stable
@@ -85,7 +85,7 @@ Doc/impl gaps
 - TUI surface is documented but not implemented (`rip-tui`).
 - MCP surface is documented but deferred to Phase 2 (`rip-mcp`).
 - Server OpenAPI spec generation is required but not implemented.
-- Capability registry is incomplete (only session lifecycle entries).
+- Surface parity matrix/gap list not generated from registry.
 - Tool runtime not yet integrated into session execution.
 - Benchmarks are required by docs but no harness exists.
 - Headless CLI currently streams raw SSE messages, not validated JSON frames.
@@ -104,5 +104,6 @@ Done (recent)
 - 2026-01-16: Event log replay equivalence + corruption detection tests.
 - 2026-01-16: Event frame schema defined + serialized across ripd/log/CLI.
 - 2026-01-16: Roadmap expanded to include full surface/capability coverage.
+- 2026-01-16: Capability registry expanded to cover full baseline + surface support fields.
 - 2026-01-16: Command registry contract implemented + tests.
 - 2026-01-16: Session hooks engine implemented + tests.
