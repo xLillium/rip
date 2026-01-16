@@ -2,6 +2,7 @@
 
 Goal
 - Build interactive and headless CLI modes.
+- TUI is a separate surface (`rip-tui`, Phase 2) and is tracked in the roadmap.
 
 Inputs
 - Module contract: docs/03_contracts/modules/phase-1/05_cli.md

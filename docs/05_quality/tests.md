@@ -10,3 +10,4 @@ Phase 1 tests
 - Workspace patch apply/rollback.
 - CLI headless JSON schema validation.
 - Server session lifecycle.
+- Server OpenAPI schema generation/validation.

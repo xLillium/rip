@@ -3,6 +3,7 @@
 Summary
 - Interactive CLI is the primary UX.
 - Headless CLI is for automation.
+- Full-screen TUI is a separate surface (`rip-tui`, Phase 2) and is tracked separately.
 
 Interactive mode (draft)
 - rip run <task>

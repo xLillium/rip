@@ -1,30 +1,50 @@
 # Rolling Roadmap
 
 Summary
-- Single source for "now vs later" decisions.
-- Lightweight on purpose; detailed task specs remain in `docs/07_tasks/phase-1/`.
-- Each item includes references + start/finish criteria so a fresh context can resume fast.
+- Single source for now/next/later decisions and capability coverage across surfaces.
+- Lightweight on purpose but exhaustive; detailed task specs remain in `docs/07_tasks/phase-1/`.
+- Each actionable item includes references + start/finish criteria so a fresh context can resume fast.
 
 How to use
-- Every item includes a confidence tag: `[confirm spec]` or `[needs work]`.
+- Every actionable item includes a confidence tag: `[confirm spec]` or `[needs work]`.
 - `[needs work]` means confirm spec or design choice before implementation.
+- Now/Next/Later items include refs, ready checklist, and done criteria.
+- Coverage map is an index only (no checklists), used to ensure every capability group is tracked.
 - Date-stamp moves between Now/Next/Later to preserve intent over time.
-- Each item includes: refs, ready checklist, and done criteria.
 
 Now
-- (empty)
-
-Next
+- Server OpenAPI spec generation + schema snapshot [needs work]
+  - Refs: `docs/03_contracts/modules/phase-1/06_server.md`, `docs/04_execution/server.md`, `docs/02_architecture/component_map.md`
+  - Ready: pick OpenAPI generator crate; decide schema output path
+  - Done: `/openapi.json` served; canonical snapshot in `schemas/`; capability registry alignment checks; validation test in CI
 - CLI interactive renderer + approvals/diffs UI surface [needs work]
   - Refs: `docs/07_tasks/phase-1/06_cli.md`, `docs/03_contracts/modules/phase-1/05_cli.md`, `docs/04_execution/cli.md`
   - Ready: event frame schema final; approval UX spec confirmed
-  - Done: interactive UI renders streams + approvals, golden render tests
+  - Done: interactive UI renders streams + approvals/diffs; golden render tests
+
+Next
 - Workspace engine: checkpoint + rewind hooks integration in runtime [needs work]
   - Refs: `docs/07_tasks/phase-1/04_workspace_engine.md`, `docs/03_contracts/modules/phase-1/04_workspace_engine.md`
   - Ready: hook points in runtime defined; checkpoint event frames defined
   - Done: runtime integration + rewind behavior tests
+- Capability registry expansion + surface support matrix [needs work]
+  - Refs: `docs/03_contracts/capability_registry.md`, `docs/03_contracts/capabilities.md`, `docs/02_architecture/capability_baseline.md`
+  - Ready: capability ids grouped by baseline category; surface support fields defined
+  - Done: registry enumerates baseline capabilities + surface support; parity gaps tracked
+- Headless CLI JSON validation [needs work]
+  - Refs: `docs/03_contracts/modules/phase-1/05_cli.md`, `docs/04_execution/cli.md`
+  - Ready: event frame schema stable
+  - Done: headless mode validates JSON frames; schema tests added
 
 Later
+- TUI surface (`rip-tui`) plan + MVP renderer [needs work]
+  - Refs: `docs/02_architecture/surfaces.md`, `docs/02_architecture/capability_matrix.md`, `temp/docs/ratatui/notes.md`
+  - Ready: confirm TUI stack + input model; define surface-specific capabilities
+  - Done: `rip-tui` package skeleton + streaming renderer; golden render tests
+- MCP surface (`rip-mcp`) parity adapter [needs work]
+  - Refs: `docs/02_architecture/surfaces.md`, `docs/02_architecture/capability_matrix.md`
+  - Ready: server capability registry expanded; MCP protocol mapping defined
+  - Done: MCP server exposes core capabilities + session lifecycle
 - Benchmarks: TTFT, parse overhead, tool dispatch, patch throughput, end-to-end loop [needs work]
   - Refs: `docs/07_tasks/phase-1/08_benchmarks.md`, `docs/05_quality/benchmarks.md`
   - Ready: event frames + tool runtime stable
@@ -38,8 +58,34 @@ Later
   - Ready: session API + event frames stable
   - Done: TS SDK supports session lifecycle + streaming
 
+Capability coverage map (index)
+- Sessions & threads [confirm spec] - Phase 1 core + server + CLI; TUI/SDK parity later.
+- Session storage & replay [confirm spec] - Phase 1 event log + snapshots; surfaces consume.
+- Context & guidance [needs work] - Phase 2 context compiler + guidance loader.
+- Configuration & policy [needs work] - Phase 2 layered config + permission engine.
+- Commands & automation [needs work] - Phase 1 in-memory registry; Phase 2 disk-based commands.
+- Execution modes [needs work] - Phase 1 interactive/headless + JSONL; Phase 2 RPC/SDK expansion.
+- Tools & tooling [confirm spec] - Phase 1 tool runtime; policy integration pending.
+- Compaction & summarization [needs work] - Phase 2 compaction engine.
+- Policy & steering [needs work] - Phase 3 adaptive budgets + rule engine.
+- Extensions & hooks [needs work] - Phase 2 extension registry + hook bus.
+- Skills [needs work] - Phase 2 skill loader + commands.
+- Subagents [needs work] - Phase 2 subagent manager + budgets.
+- Models & providers [needs work] - Phase 1 adapter boundary; multi-provider routing.
+- Output styles [needs work] - Phase 2 style registry.
+- UI/interaction [needs work] - Phase 2 TUI + interaction affordances.
+- Integrations [needs work] - Phase 2 MCP/IDE/LSP.
+- Background workers [needs work] - Phase 3.
+- Checkpointing & rewind [needs work] - Phase 1 workspace engine integration.
+- Security & safety [needs work] - Phase 1 baseline + Phase 3 extended sandboxing.
+- Search/index & memory [needs work] - Phase 3.
+
 Doc/impl gaps
 - Interactive CLI is specified but not implemented (see `docs/07_tasks/phase-1/06_cli.md`).
+- TUI surface is documented but not implemented (`rip-tui`).
+- MCP surface is documented but deferred to Phase 2 (`rip-mcp`).
+- Server OpenAPI spec generation is required but not implemented.
+- Capability registry is incomplete (only session lifecycle entries).
 - Tool runtime not yet integrated into session execution.
 - Benchmarks are required by docs but no harness exists.
 - Headless CLI currently streams raw SSE messages, not validated JSON frames.
@@ -57,3 +103,6 @@ Done (recent)
 - 2026-01-16: Provider adapter emits full provider_event frames + fixtures/tests.
 - 2026-01-16: Event log replay equivalence + corruption detection tests.
 - 2026-01-16: Event frame schema defined + serialized across ripd/log/CLI.
+- 2026-01-16: Roadmap expanded to include full surface/capability coverage.
+- 2026-01-16: Command registry contract implemented + tests.
+- 2026-01-16: Session hooks engine implemented + tests.

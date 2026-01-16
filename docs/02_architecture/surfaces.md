@@ -3,13 +3,17 @@
 Summary
 - All surfaces are thin adapters over the same core session + capability API.
 - No surface owns business logic; parity is enforced by contract and tests.
+- Server API is the canonical control plane for capability access.
 
-Surfaces (Phase 1 + planned)
-- Headless CLI: `rip-cli` (default entrypoint for automation)
+Surfaces (Phase 1)
+- Interactive CLI: `rip-cli` (streaming, diffs, approvals)
+- Headless CLI: `rip-cli --headless` (automation JSON)
+- Server: `ripd` (session HTTP/SSE + OpenAPI spec)
+- SDKs: `rip-sdk-*` (TypeScript first; optional Python later)
+
+Surfaces (Phase 2 / planned)
 - Terminal UI (TUI): `rip-tui` (rich rendering only)
-- Server: `ripd` (session HTTP/SSE)
 - MCP server: `rip-mcp` (capability exposure via MCP)
-- SDKs: `rip-sdk-*` (generated or thin clients)
 
 Adapter rule
 - Surfaces may translate transports, render output, and handle IO.
@@ -21,6 +25,10 @@ Parity rule
   - Defined in the core capability contract, and
   - Exposed by every active surface, or
   - Explicitly deferred with a tracked gap and approval.
+
+Surface-specific capabilities
+- Some capabilities are UI-only or transport-specific.
+- They still must be declared in the capability registry, and other surfaces must explicitly mark support or unsupported status.
 
 Implications
 - New feature work starts by extending the capability contract.

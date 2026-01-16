@@ -22,3 +22,4 @@ Registry rules
 Compliance
 - Each surface declares support for each capability version.
 - Parity gaps must be explicitly tracked and approved.
+- Surface-specific capabilities (UI/transport only) still require explicit support/unsupported declarations on every surface.

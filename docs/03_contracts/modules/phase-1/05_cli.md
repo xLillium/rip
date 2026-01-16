@@ -3,6 +3,7 @@
 Summary
 - Interactive: rich streaming UI with approvals/diffs.
 - Headless: JSON events for automation.
+- Full-screen TUI is a separate surface (`rip-tui`) with the same capability ids (Phase 2).
 
 Inputs
 - User prompts and commands.

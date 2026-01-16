@@ -3,6 +3,8 @@
 Summary
 - Capability checklist for modern coding agents.
 - Used to ensure architectural coverage across phases.
+- Coverage and surface parity are tracked in the capability registry and roadmap.
+- Surface-specific items still require explicit support/unsupported declarations.
 
 Sessions & Threads
 - Start, continue, and resume sessions from prior state.

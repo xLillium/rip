@@ -7,6 +7,7 @@ Summary
 Checks
 - Capability registry vs surface adapters: all ids present.
 - Capability versions are aligned across surfaces.
+- Server OpenAPI schema includes all active capability ids.
 - Gaps must be explicitly listed with approval and expiry date.
 
 Artifacts

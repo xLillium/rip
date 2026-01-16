@@ -24,6 +24,7 @@ Product surfaces
 - Headless CLI (scriptable JSON output).
 - Agent server (exposes agent sessions, not Open Responses API).
 - SDK (TypeScript first; optional Python later).
+- Terminal UI (TUI) and MCP surface are planned expansions.
 
 Design stance
 - Open Responses used only for provider adapters (ingress/egress).

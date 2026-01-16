@@ -24,7 +24,7 @@ Navigation
 
 Status
 - Phase 1: foundation (kernel, adapters, tools, workspace, CLI, server, benchmarks)
-- Phase 2: expansion (search, memory, context compiler, policy, background workers)
+- Phase 2: expansion (TUI, MCP, search, memory, context compiler, policy, background workers)
 
 Rules
 - Every module must have a contract doc before implementation.
