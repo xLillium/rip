@@ -3,7 +3,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use rip_kernel::{Event, EventKind, ProviderEventStatus};
+
+mod stream_transformers;
 use rip_openresponses::{validate_response_resource, validate_stream_event};
+pub use stream_transformers::{
+    extract_reasoning_deltas, extract_text_deltas, extract_tool_call_argument_deltas,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ParsedEventKind {
