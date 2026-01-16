@@ -19,6 +19,25 @@ Frame types
   - `delta`: string
 - `session_ended`
   - `reason`: string
+- `tool_started`
+  - `tool_id`: string (uuid)
+  - `name`: string
+  - `args`: object
+  - `timeout_ms`: u64 | null
+- `tool_stdout`
+  - `tool_id`: string
+  - `chunk`: string
+- `tool_stderr`
+  - `tool_id`: string
+  - `chunk`: string
+- `tool_ended`
+  - `tool_id`: string
+  - `exit_code`: i32
+  - `duration_ms`: u64
+  - `artifacts`: object | null
+- `tool_failed`
+  - `tool_id`: string
+  - `error`: string
 - `provider_event`
   - `provider`: string (e.g. `openresponses`)
   - `status`: `event` | `done` | `invalid_json`

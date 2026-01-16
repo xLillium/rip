@@ -41,6 +41,30 @@ pub enum EventKind {
     SessionEnded {
         reason: String,
     },
+    ToolStarted {
+        tool_id: String,
+        name: String,
+        args: Value,
+        timeout_ms: Option<u64>,
+    },
+    ToolStdout {
+        tool_id: String,
+        chunk: String,
+    },
+    ToolStderr {
+        tool_id: String,
+        chunk: String,
+    },
+    ToolEnded {
+        tool_id: String,
+        exit_code: i32,
+        duration_ms: u64,
+        artifacts: Option<Value>,
+    },
+    ToolFailed {
+        tool_id: String,
+        error: String,
+    },
     ProviderEvent {
         provider: String,
         status: ProviderEventStatus,
@@ -177,7 +201,12 @@ impl Session {
                 (Some(HookEventKind::Output), Some(delta.clone()))
             }
             EventKind::SessionEnded { .. } => (Some(HookEventKind::SessionEnded), None),
-            EventKind::ProviderEvent { .. } => (None, None),
+            EventKind::ProviderEvent { .. }
+            | EventKind::ToolStarted { .. }
+            | EventKind::ToolStdout { .. }
+            | EventKind::ToolStderr { .. }
+            | EventKind::ToolEnded { .. }
+            | EventKind::ToolFailed { .. } => (None, None),
         };
 
         if let Some(hook_event) = hook_event {

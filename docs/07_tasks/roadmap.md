@@ -15,10 +15,6 @@ Now
 - (empty)
 
 Next
-- Tool runtime: execution limits + streaming tool output events [needs work]
-  - Refs: `docs/07_tasks/phase-1/03_tool_runtime.md`, `docs/03_contracts/modules/phase-1/03_tool_runtime.md`
-  - Ready: tool event frame schema defined; sandbox policy clarified
-  - Done: tool registry + executor, timeout/cancel behavior tests, deterministic tool output fixtures
 - CLI interactive renderer + approvals/diffs UI surface [needs work]
   - Refs: `docs/07_tasks/phase-1/06_cli.md`, `docs/03_contracts/modules/phase-1/05_cli.md`, `docs/04_execution/cli.md`
   - Ready: event frame schema final; approval UX spec confirmed
@@ -48,18 +44,19 @@ Later
 
 Doc/impl gaps
 - Interactive CLI is specified but not implemented (see `docs/07_tasks/phase-1/06_cli.md`).
-- Tool runtime and tool event framing are specified but not implemented.
+- Tool runtime not yet integrated into session execution.
 - Benchmarks are required by docs but no harness exists.
 - Headless CLI currently streams raw SSE messages, not validated JSON frames.
 
 Decisions
 - Event frames live in `rip-kernel`; schema documented at `docs/03_contracts/event_frames.md`.
-- Phase 1 frame types: `session_started`, `output_text_delta`, `session_ended`, `provider_event`.
+- Phase 1 frame types: `session_started`, `output_text_delta`, `session_ended`, `provider_event`, tool events.
 
 Open questions
 - (empty)
 
 Done (recent)
+- 2026-01-16: Tool runtime emits structured tool events with limits + tests.
 - 2026-01-16: Provider adapter emits full provider_event frames + fixtures/tests.
 - 2026-01-16: Event log replay equivalence + corruption detection tests.
 - 2026-01-16: Event frame schema defined + serialized across ripd/log/CLI.
