@@ -12,15 +12,7 @@ How to use
 - Each item includes: refs, ready checklist, and done criteria.
 
 Now
-- Provider adapter: Open Responses SSE -> provider_event frames + validation [confirm spec]
-  - Refs: `docs/07_tasks/phase-1/02_provider_adapter.md`, `docs/03_contracts/modules/phase-1/02_provider_adapters.md`
-  - Ready: provider_event frame schema defined; OpenAPI schema synced; split-schema fixtures generated
-  - Done: every SSE event (incl. `[DONE]`/invalid JSON) maps to provider_event, `type` + response validation recorded, golden stream replay vs fixtures passes
-  - Progress: mapping + unit tests updated; fixtures pending
-- Event log replay -> snapshot equivalence + corruption detection [confirm spec]
-  - Refs: `docs/07_tasks/phase-1/05_event_log.md`, `docs/03_contracts/modules/phase-1/07_event_log.md`
-  - Ready: frame schema stable; snapshot format confirmed
-  - Done: replay equals snapshot, corruption tests fail fast, append/replay tests pass
+- (empty)
 
 Next
 - Tool runtime: execution limits + streaming tool output events [needs work]
@@ -68,4 +60,6 @@ Open questions
 - (empty)
 
 Done (recent)
+- 2026-01-16: Provider adapter emits full provider_event frames + fixtures/tests.
+- 2026-01-16: Event log replay equivalence + corruption detection tests.
 - 2026-01-16: Event frame schema defined + serialized across ripd/log/CLI.
