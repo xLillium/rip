@@ -44,6 +44,7 @@ Commands & Automation
 - Custom commands loaded from directories with namespacing and arguments.
 - Command aliases and prompt templates.
 - Commands can run scripts or insert structured prompts.
+- Command definitions can include allowed-tools and file references.
 
 Execution Modes
 - Interactive TUI/CLI mode.
@@ -54,6 +55,7 @@ Execution Modes
 - Streaming JSON input mode (stdin as event stream).
 - Structured JSONL event stream with an explicit output schema.
 - Resume prior sessions by ID in headless mode.
+- Output format control for text, JSON, and streaming JSON.
 
 Tools & Tooling
 - Built-in file tools (read/write/edit/grep/find/ls) and shell tool.
@@ -111,6 +113,7 @@ Subagents
 - Background/foreground subagent execution with handoff controls.
 - Auto-delegation rules from the primary agent to subagents.
 - Subagent definitions loaded from config or markdown.
+- Subagents definable at runtime via CLI flags or RPC config.
 
 Models & Providers
 - Multi-provider support with model switching at runtime.
@@ -141,6 +144,7 @@ UI/Interaction
 - Custom commands (prompt templates or scripts) via command palette.
 - Interactive mode keyboard shortcuts, reverse search, and editor integrations.
 - Background task execution with status updates.
+- Direct shell input mode for quick commands.
 
 Integrations
 - MCP servers (local/remote) with OAuth support.
