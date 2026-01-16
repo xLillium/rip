@@ -3,6 +3,7 @@
 Summary
 - Translate between internal frames and provider protocol.
 - Open Responses used only at the boundary.
+- Canonical schema source is the bundled OpenAPI JSON synced into this repo.
 
 Inputs
 - Internal request frames (model, instructions, tools, context).
@@ -10,6 +11,10 @@ Inputs
 Outputs
 - Internal event frames mapped from provider SSE events.
 - Streaming event `type` validation against Open Responses schema-derived list.
+- Full streaming event and response validation against OpenAPI JSON schemas.
+
+Spec sync
+- Run `scripts/update-openresponses-types` to sync `schemas/openresponses/openapi.json` and derived event types.
 
 Config
 - Provider selection and routing rules.

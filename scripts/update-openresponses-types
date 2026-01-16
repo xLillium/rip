@@ -1,20 +1,50 @@
 #!/usr/bin/env python3
 import json
 import os
+import shutil
 from pathlib import Path
 
-schema_dir = Path(os.environ.get("OPENRESPONSES_SCHEMA_DIR", "temp/openresponses/schema/components/schemas"))
+repo = Path(os.environ.get("OPENRESPONSES_REPO", "temp/openresponses"))
+openapi_src = os.environ.get("OPENRESPONSES_OPENAPI")
 
-if not schema_dir.exists():
-    raise SystemExit(f"schema dir not found: {schema_dir}")
+if openapi_src:
+    src = Path(openapi_src)
+else:
+    src = repo / "public/openapi/openapi.json"
+    if not src.exists():
+        src = repo / "schema/openapi.json"
 
+if not src.exists():
+    raise SystemExit(f"openapi.json not found at {src}")
+
+dst = Path("schemas/openresponses/openapi.json")
+dst.parent.mkdir(parents=True, exist_ok=True)
+shutil.copy2(src, dst)
+
+spec = json.loads(dst.read_text())
+
+schema_ptr = "/paths/~1responses/post/responses/200/content/text~1event-stream/schema"
+stream_schema = spec
+for part in [p for p in schema_ptr.split("/") if p]:
+    part = part.replace("~1", "/").replace("~0", "~")
+    if isinstance(stream_schema, dict) and part in stream_schema:
+        stream_schema = stream_schema[part]
+    else:
+        stream_schema = None
+        break
+
+if not stream_schema or "oneOf" not in stream_schema:
+    raise SystemExit("streaming event schema not found in openapi.json")
+
+components = spec.get("components", {}).get("schemas", {})
 allowed = []
-for path in schema_dir.glob("*StreamingEvent.json"):
-    try:
-        data = json.loads(path.read_text())
-    except Exception:
+for item in stream_schema.get("oneOf", []):
+    ref = item.get("$ref")
+    if not ref or not ref.startswith("#/components/schemas/"):
         continue
-    type_info = data.get("properties", {}).get("type", {})
+    name = ref.split("/")[-1]
+    schema = components.get(name, {})
+    type_info = schema.get("properties", {}).get("type", {})
     enum = type_info.get("enum")
     if isinstance(enum, list) and enum:
         allowed.append(enum[0])
@@ -22,6 +52,6 @@ for path in schema_dir.glob("*StreamingEvent.json"):
 allowed = sorted(set(allowed))
 
 out_path = Path("schemas/openresponses/streaming_event_types.json")
-out_path.parent.mkdir(parents=True, exist_ok=True)
 out_path.write_text(json.dumps(allowed, indent=2) + "\n")
-print(f"wrote {out_path} ({len(allowed)} types)")
+
+print(f"synced {dst} and wrote {out_path} ({len(allowed)} types)")
