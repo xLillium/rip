@@ -14,3 +14,8 @@ uuid = { version = "1.6", features = ["v4"] }
 
 rip-kernel = { path = "../rip-kernel" }
 rip-log = { path = "../rip-log" }
+
+[dev-dependencies]
+http-body-util = "0.1"
+tempfile = "3.10"
+tower = "0.5"

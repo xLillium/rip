@@ -20,7 +20,12 @@ enum Commands {
         prompt: String,
         #[arg(long, default_value = "http://127.0.0.1:7341")]
         server: String,
-        #[arg(long, default_value_t = true)]
+        #[arg(
+            long,
+            default_value_t = true,
+            value_parser = clap::value_parser!(bool),
+            action = clap::ArgAction::Set
+        )]
         headless: bool,
     },
 }
@@ -32,8 +37,10 @@ struct SessionCreated {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let cli = Cli::parse();
+    run(Cli::parse()).await
+}
 
+async fn run(cli: Cli) -> anyhow::Result<()> {
     match cli.command {
         Commands::Run {
             prompt,
@@ -107,4 +114,134 @@ async fn stream_events(client: &Client, server: &str, session_id: &str) -> anyho
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use httpmock::Method::{GET, POST};
+    use httpmock::MockServer;
+
+    #[tokio::test]
+    async fn create_session_success() {
+        let server = MockServer::start();
+        let mock = server.mock(|when, then| {
+            when.method(POST).path("/sessions");
+            then.status(201)
+                .header("content-type", "application/json")
+                .body(r#"{"session_id":"abc"}"#);
+        });
+
+        let client = Client::new();
+        let session_id = create_session(&client, &server.base_url()).await.unwrap();
+        assert_eq!(session_id, "abc");
+        mock.assert();
+    }
+
+    #[tokio::test]
+    async fn create_session_failure() {
+        let server = MockServer::start();
+        let _mock = server.mock(|when, then| {
+            when.method(POST).path("/sessions");
+            then.status(500);
+        });
+
+        let client = Client::new();
+        let err = create_session(&client, &server.base_url())
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("create session failed"));
+    }
+
+    #[tokio::test]
+    async fn send_input_failure() {
+        let server = MockServer::start();
+        let _mock = server.mock(|when, then| {
+            when.method(POST).path("/sessions/s1/input");
+            then.status(400);
+        });
+
+        let client = Client::new();
+        let err = send_input(&client, &server.base_url(), "s1", "hi")
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("send input failed"));
+    }
+
+    #[tokio::test]
+    async fn stream_events_reads_messages() {
+        let server = MockServer::start();
+        let _mock = server.mock(|when, then| {
+            when.method(GET).path("/sessions/s1/events");
+            then.status(200)
+                .header("content-type", "text/event-stream")
+                .body("data: {\"type\":\"session_started\"}\n\n");
+        });
+        let client = Client::new();
+        let result = stream_events(&client, &server.base_url(), "s1").await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn run_headless_with_interactive_flag() {
+        let server = MockServer::start();
+        let _create = server.mock(|when, then| {
+            when.method(POST).path("/sessions");
+            then.status(201)
+                .header("content-type", "application/json")
+                .body(r#"{"session_id":"abc"}"#);
+        });
+        let _input = server.mock(|when, then| {
+            when.method(POST).path("/sessions/abc/input");
+            then.status(202);
+        });
+        let _events = server.mock(|when, then| {
+            when.method(GET).path("/sessions/abc/events");
+            then.status(200)
+                .header("content-type", "text/event-stream")
+                .body("data: {\"type\":\"session_started\"}\n\n");
+        });
+
+        let cli = Cli {
+            command: Commands::Run {
+                prompt: "hello".to_string(),
+                server: server.base_url(),
+                headless: false,
+            },
+        };
+        let result = run(cli).await;
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn cli_parses_run() {
+        let cli = Cli::parse_from(["rip", "run", "hello"]);
+        match cli.command {
+            Commands::Run { prompt, .. } => assert_eq!(prompt, "hello"),
+        }
+    }
+
+    #[test]
+    fn cli_defaults_headless() {
+        let cli = Cli::parse_from(["rip", "run", "hello"]);
+        match cli.command {
+            Commands::Run { headless, .. } => assert!(headless),
+        }
+    }
+
+    #[test]
+    fn cli_respects_server_flag() {
+        let cli = Cli::parse_from(["rip", "run", "hello", "--server", "http://local"]);
+        match cli.command {
+            Commands::Run { server, .. } => assert_eq!(server, "http://local"),
+        }
+    }
+
+    #[test]
+    fn cli_respects_headless_flag() {
+        let cli = Cli::parse_from(["rip", "run", "hello", "--headless", "false"]);
+        match cli.command {
+            Commands::Run { headless, .. } => assert!(!headless),
+        }
+    }
 }
