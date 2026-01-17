@@ -5,6 +5,7 @@ Summary
 - Each item should be marked complete only when mapped to internal frames and validated at the provider boundary.
 
 Progress log
+- 2026-01-17: Marked bundled streaming events and output item schemas as mapped/validated in the checklist (remaining events/items pending split-schema validation).
 - 2026-01-17: Roadmap gate added (`docs/07_tasks/roadmap.md`). Tool/tool_choice request validation + builder support landed (commit `c8946dd`); split schema notes captured in `temp/docs/openresponses/`.
 - 2026-01-17: Verified schema index covers all 412 split components; added additive patch schemas (`InputVideoContent`, `JsonSchemaResponseFormatParam`, `TextFormatParam`) to checklist.
 - 2026-01-17: Implemented full tool/tool_choice variant validation + builders; checked off related schemas in the task tracker.
@@ -171,9 +172,9 @@ Progress log
 - [ ] `FileSearchRetrievedChunksParam` mapped and validated.
 - [ ] `FileSearchToolCallStatusEnum` mapped and validated.
 - [ ] `Filters` mapped and validated.
-- [ ] `FunctionCall` mapped and validated.
+- [x] `FunctionCall` mapped and validated.
 - [ ] `FunctionCallItemStatus` mapped and validated.
-- [ ] `FunctionCallOutput` mapped and validated.
+- [x] `FunctionCallOutput` mapped and validated.
 - [ ] `FunctionCallOutputStatusEnum` mapped and validated.
 - [ ] `FunctionCallStatus` mapped and validated.
 - [ ] `FunctionShellAction` mapped and validated.
@@ -256,7 +257,7 @@ Progress log
 - [ ] `MCPToolCallStatus` mapped and validated.
 - [ ] `MCPToolFilterField` mapped and validated.
 - [ ] `MCPToolFilterParam` mapped and validated.
-- [ ] `Message` mapped and validated.
+- [x] `Message` mapped and validated.
 - [ ] `MessageRole` mapped and validated.
 - [ ] `MessageRole1` mapped and validated.
 - [ ] `MessageStatus` mapped and validated.
@@ -273,7 +274,7 @@ Progress log
 - [ ] `RankerVersionType` mapped and validated.
 - [ ] `RankingOptions` mapped and validated.
 - [ ] `Reasoning` mapped and validated.
-- [ ] `ReasoningBody` mapped and validated.
+- [x] `ReasoningBody` mapped and validated.
 - [ ] `ReasoningEffortEnum` mapped and validated.
 - [ ] `ReasoningParam` mapped and validated.
 - [ ] `ReasoningSummaryContentParam` mapped and validated.
@@ -354,7 +355,7 @@ Progress log
 - [ ] `ResponsesConversationParam` mapped and validated.
 
 ### Streaming events
-- [ ] `ErrorStreamingEvent` mapped and validated.
+- [x] `ErrorStreamingEvent` mapped and validated.
 - [ ] `ImageEditCompletedStreamingEvent` mapped and validated.
 - [ ] `ImageEditPartialImageStreamingEvent` mapped and validated.
 - [ ] `ImageGenerationCompletedStreamingEvent` mapped and validated.
@@ -366,24 +367,24 @@ Progress log
 - [ ] `ResponseCodeInterpreterCallCompletedStreamingEvent` mapped and validated.
 - [ ] `ResponseCodeInterpreterCallInProgressStreamingEvent` mapped and validated.
 - [ ] `ResponseCodeInterpreterCallInterpretingStreamingEvent` mapped and validated.
-- [ ] `ResponseCompletedStreamingEvent` mapped and validated.
-- [ ] `ResponseContentPartAddedStreamingEvent` mapped and validated.
-- [ ] `ResponseContentPartDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseCreatedStreamingEvent` mapped and validated.
+- [x] `ResponseCompletedStreamingEvent` mapped and validated.
+- [x] `ResponseContentPartAddedStreamingEvent` mapped and validated.
+- [x] `ResponseContentPartDoneStreamingEvent` mapped and validated.
+- [x] `ResponseCreatedStreamingEvent` mapped and validated.
 - [ ] `ResponseCustomToolCallInputDeltaStreamingEvent` mapped and validated.
 - [ ] `ResponseCustomToolCallInputDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseFailedStreamingEvent` mapped and validated.
+- [x] `ResponseFailedStreamingEvent` mapped and validated.
 - [ ] `ResponseFileSearchCallCompletedStreamingEvent` mapped and validated.
 - [ ] `ResponseFileSearchCallInProgressStreamingEvent` mapped and validated.
 - [ ] `ResponseFileSearchCallSearchingStreamingEvent` mapped and validated.
-- [ ] `ResponseFunctionCallArgumentsDeltaStreamingEvent` mapped and validated.
-- [ ] `ResponseFunctionCallArgumentsDoneStreamingEvent` mapped and validated.
+- [x] `ResponseFunctionCallArgumentsDeltaStreamingEvent` mapped and validated.
+- [x] `ResponseFunctionCallArgumentsDoneStreamingEvent` mapped and validated.
 - [ ] `ResponseImageGenCallCompletedStreamingEvent` mapped and validated.
 - [ ] `ResponseImageGenCallGeneratingStreamingEvent` mapped and validated.
 - [ ] `ResponseImageGenCallInProgressStreamingEvent` mapped and validated.
 - [ ] `ResponseImageGenCallPartialImageStreamingEvent` mapped and validated.
-- [ ] `ResponseInProgressStreamingEvent` mapped and validated.
-- [ ] `ResponseIncompleteStreamingEvent` mapped and validated.
+- [x] `ResponseInProgressStreamingEvent` mapped and validated.
+- [x] `ResponseIncompleteStreamingEvent` mapped and validated.
 - [ ] `ResponseMCPCallArgumentsDeltaStreamingEvent` mapped and validated.
 - [ ] `ResponseMCPCallArgumentsDoneStreamingEvent` mapped and validated.
 - [ ] `ResponseMCPCallCompletedStreamingEvent` mapped and validated.
@@ -392,20 +393,20 @@ Progress log
 - [ ] `ResponseMCPListToolsCompletedStreamingEvent` mapped and validated.
 - [ ] `ResponseMCPListToolsFailedStreamingEvent` mapped and validated.
 - [ ] `ResponseMCPListToolsInProgressStreamingEvent` mapped and validated.
-- [ ] `ResponseOutputItemAddedStreamingEvent` mapped and validated.
-- [ ] `ResponseOutputItemDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseOutputTextAnnotationAddedStreamingEvent` mapped and validated.
-- [ ] `ResponseOutputTextDeltaStreamingEvent` mapped and validated.
-- [ ] `ResponseOutputTextDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseQueuedStreamingEvent` mapped and validated.
-- [ ] `ResponseReasoningDeltaStreamingEvent` mapped and validated.
-- [ ] `ResponseReasoningDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseReasoningSummaryDeltaStreamingEvent` mapped and validated.
-- [ ] `ResponseReasoningSummaryDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseReasoningSummaryPartAddedStreamingEvent` mapped and validated.
-- [ ] `ResponseReasoningSummaryPartDoneStreamingEvent` mapped and validated.
-- [ ] `ResponseRefusalDeltaStreamingEvent` mapped and validated.
-- [ ] `ResponseRefusalDoneStreamingEvent` mapped and validated.
+- [x] `ResponseOutputItemAddedStreamingEvent` mapped and validated.
+- [x] `ResponseOutputItemDoneStreamingEvent` mapped and validated.
+- [x] `ResponseOutputTextAnnotationAddedStreamingEvent` mapped and validated.
+- [x] `ResponseOutputTextDeltaStreamingEvent` mapped and validated.
+- [x] `ResponseOutputTextDoneStreamingEvent` mapped and validated.
+- [x] `ResponseQueuedStreamingEvent` mapped and validated.
+- [x] `ResponseReasoningDeltaStreamingEvent` mapped and validated.
+- [x] `ResponseReasoningDoneStreamingEvent` mapped and validated.
+- [x] `ResponseReasoningSummaryDeltaStreamingEvent` mapped and validated.
+- [x] `ResponseReasoningSummaryDoneStreamingEvent` mapped and validated.
+- [x] `ResponseReasoningSummaryPartAddedStreamingEvent` mapped and validated.
+- [x] `ResponseReasoningSummaryPartDoneStreamingEvent` mapped and validated.
+- [x] `ResponseRefusalDeltaStreamingEvent` mapped and validated.
+- [x] `ResponseRefusalDoneStreamingEvent` mapped and validated.
 - [ ] `ResponseShellCallCommandAddedStreamingEvent` mapped and validated.
 - [ ] `ResponseShellCallCommandDeltaStreamingEvent` mapped and validated.
 - [ ] `ResponseShellCallCommandDoneStreamingEvent` mapped and validated.

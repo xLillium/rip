@@ -32,6 +32,7 @@ Mapping rules (Phase 1)
 
 Implementation status (current)
 - Provider adapter validates streaming events and embedded `response` objects against the bundled OpenAPI schema (`schemas/openresponses/openapi.json`).
+- Bundled OpenAPI validates 24/58 streaming event schemas and 4/23 output item variants; remaining streaming events and output items are pending validation until the split schemas are integrated.
 - Provider request builder validates CreateResponseBody payloads (errors captured; payload preserved); tool fields use per-variant validation to avoid jsonschema oneOf failures; request sending is not wired yet.
 - Tool schema validation is available for all `ResponsesToolParam` and `ToolChoiceParam` variants using manual required-field checks; bundled OpenAPI only includes function tool variants.
 - Input item variants are not yet mapped to internal request frames (pending).
@@ -235,64 +236,64 @@ Doc discrepancies (resolved)
 ## Streaming events (SSE)
 | event type | schema | mapping |
 | --- | --- | --- |
-| `error` | `ErrorStreamingEvent.json` | provider_event |
-| `image_edit.completed` | `ImageEditCompletedStreamingEvent.json` | provider_event |
-| `image_edit.partial_image` | `ImageEditPartialImageStreamingEvent.json` | provider_event |
-| `image_generation.completed` | `ImageGenerationCompletedStreamingEvent.json` | provider_event |
-| `image_generation.partial_image` | `ImageGenerationPartialImageStreamingEvent.json` | provider_event |
-| `response.apply_patch_call_operation_diff.delta` | `ResponseApplyPatchCallOperationDiffDeltaStreamingEvent.json` | provider_event |
-| `response.apply_patch_call_operation_diff.done` | `ResponseApplyPatchCallOperationDiffDoneStreamingEvent.json` | provider_event |
-| `response.code_interpreter_call.completed` | `ResponseCodeInterpreterCallCompletedStreamingEvent.json` | provider_event |
-| `response.code_interpreter_call.in_progress` | `ResponseCodeInterpreterCallInProgressStreamingEvent.json` | provider_event |
-| `response.code_interpreter_call.interpreting` | `ResponseCodeInterpreterCallInterpretingStreamingEvent.json` | provider_event |
-| `response.code_interpreter_call_code.delta` | `ResponseCodeInterpreterCallCodeDeltaStreamingEvent.json` | provider_event |
-| `response.code_interpreter_call_code.done` | `ResponseCodeInterpreterCallCodeDoneStreamingEvent.json` | provider_event |
-| `response.completed` | `ResponseCompletedStreamingEvent.json` | provider_event |
-| `response.content_part.added` | `ResponseContentPartAddedStreamingEvent.json` | provider_event |
-| `response.content_part.done` | `ResponseContentPartDoneStreamingEvent.json` | provider_event |
-| `response.created` | `ResponseCreatedStreamingEvent.json` | provider_event |
-| `response.custom_tool_call_input.delta` | `ResponseCustomToolCallInputDeltaStreamingEvent.json` | provider_event |
-| `response.custom_tool_call_input.done` | `ResponseCustomToolCallInputDoneStreamingEvent.json` | provider_event |
-| `response.failed` | `ResponseFailedStreamingEvent.json` | provider_event |
-| `response.file_search_call.completed` | `ResponseFileSearchCallCompletedStreamingEvent.json` | provider_event |
-| `response.file_search_call.in_progress` | `ResponseFileSearchCallInProgressStreamingEvent.json` | provider_event |
-| `response.file_search_call.searching` | `ResponseFileSearchCallSearchingStreamingEvent.json` | provider_event |
-| `response.function_call_arguments.delta` | `ResponseFunctionCallArgumentsDeltaStreamingEvent.json` | provider_event |
-| `response.function_call_arguments.done` | `ResponseFunctionCallArgumentsDoneStreamingEvent.json` | provider_event |
-| `response.image_generation_call.completed` | `ResponseImageGenCallCompletedStreamingEvent.json` | provider_event |
-| `response.image_generation_call.generating` | `ResponseImageGenCallGeneratingStreamingEvent.json` | provider_event |
-| `response.image_generation_call.in_progress` | `ResponseImageGenCallInProgressStreamingEvent.json` | provider_event |
-| `response.image_generation_call.partial_image` | `ResponseImageGenCallPartialImageStreamingEvent.json` | provider_event |
-| `response.in_progress` | `ResponseInProgressStreamingEvent.json` | provider_event |
-| `response.incomplete` | `ResponseIncompleteStreamingEvent.json` | provider_event |
-| `response.mcp_call.completed` | `ResponseMCPCallCompletedStreamingEvent.json` | provider_event |
-| `response.mcp_call.failed` | `ResponseMCPCallFailedStreamingEvent.json` | provider_event |
-| `response.mcp_call.in_progress` | `ResponseMCPCallInProgressStreamingEvent.json` | provider_event |
-| `response.mcp_call_arguments.delta` | `ResponseMCPCallArgumentsDeltaStreamingEvent.json` | provider_event |
-| `response.mcp_call_arguments.done` | `ResponseMCPCallArgumentsDoneStreamingEvent.json` | provider_event |
-| `response.mcp_list_tools.completed` | `ResponseMCPListToolsCompletedStreamingEvent.json` | provider_event |
-| `response.mcp_list_tools.failed` | `ResponseMCPListToolsFailedStreamingEvent.json` | provider_event |
-| `response.mcp_list_tools.in_progress` | `ResponseMCPListToolsInProgressStreamingEvent.json` | provider_event |
-| `response.output_item.added` | `ResponseOutputItemAddedStreamingEvent.json` | provider_event |
-| `response.output_item.done` | `ResponseOutputItemDoneStreamingEvent.json` | provider_event |
-| `response.output_text.annotation.added` | `ResponseOutputTextAnnotationAddedStreamingEvent.json` | provider_event |
-| `response.output_text.delta` | `ResponseOutputTextDeltaStreamingEvent.json` | provider_event |
-| `response.output_text.done` | `ResponseOutputTextDoneStreamingEvent.json` | provider_event |
-| `response.queued` | `ResponseQueuedStreamingEvent.json` | provider_event |
-| `response.reasoning.delta` | `ResponseReasoningDeltaStreamingEvent.json` | provider_event |
-| `response.reasoning.done` | `ResponseReasoningDoneStreamingEvent.json` | provider_event |
-| `response.reasoning_summary_part.added` | `ResponseReasoningSummaryPartAddedStreamingEvent.json` | provider_event |
-| `response.reasoning_summary_part.done` | `ResponseReasoningSummaryPartDoneStreamingEvent.json` | provider_event |
-| `response.reasoning_summary_text.delta` | `ResponseReasoningSummaryDeltaStreamingEvent.json` | provider_event |
-| `response.reasoning_summary_text.done` | `ResponseReasoningSummaryDoneStreamingEvent.json` | provider_event |
-| `response.refusal.delta` | `ResponseRefusalDeltaStreamingEvent.json` | provider_event |
-| `response.refusal.done` | `ResponseRefusalDoneStreamingEvent.json` | provider_event |
-| `response.shell_call_command.added` | `ResponseShellCallCommandAddedStreamingEvent.json` | provider_event |
-| `response.shell_call_command.delta` | `ResponseShellCallCommandDeltaStreamingEvent.json` | provider_event |
-| `response.shell_call_command.done` | `ResponseShellCallCommandDoneStreamingEvent.json` | provider_event |
-| `response.web_search_call.completed` | `ResponseWebSearchCallCompletedStreamingEvent.json` | provider_event |
-| `response.web_search_call.in_progress` | `ResponseWebSearchCallInProgressStreamingEvent.json` | provider_event |
-| `response.web_search_call.searching` | `ResponseWebSearchCallSearchingStreamingEvent.json` | provider_event |
+| `error` | `ErrorStreamingEvent.json` | provider_event (validated) |
+| `image_edit.completed` | `ImageEditCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `image_edit.partial_image` | `ImageEditPartialImageStreamingEvent.json` | provider_event (pending validation) |
+| `image_generation.completed` | `ImageGenerationCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `image_generation.partial_image` | `ImageGenerationPartialImageStreamingEvent.json` | provider_event (pending validation) |
+| `response.apply_patch_call_operation_diff.delta` | `ResponseApplyPatchCallOperationDiffDeltaStreamingEvent.json` | provider_event (pending validation) |
+| `response.apply_patch_call_operation_diff.done` | `ResponseApplyPatchCallOperationDiffDoneStreamingEvent.json` | provider_event (pending validation) |
+| `response.code_interpreter_call.completed` | `ResponseCodeInterpreterCallCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `response.code_interpreter_call.in_progress` | `ResponseCodeInterpreterCallInProgressStreamingEvent.json` | provider_event (pending validation) |
+| `response.code_interpreter_call.interpreting` | `ResponseCodeInterpreterCallInterpretingStreamingEvent.json` | provider_event (pending validation) |
+| `response.code_interpreter_call_code.delta` | `ResponseCodeInterpreterCallCodeDeltaStreamingEvent.json` | provider_event (pending validation) |
+| `response.code_interpreter_call_code.done` | `ResponseCodeInterpreterCallCodeDoneStreamingEvent.json` | provider_event (pending validation) |
+| `response.completed` | `ResponseCompletedStreamingEvent.json` | provider_event (validated) |
+| `response.content_part.added` | `ResponseContentPartAddedStreamingEvent.json` | provider_event (validated) |
+| `response.content_part.done` | `ResponseContentPartDoneStreamingEvent.json` | provider_event (validated) |
+| `response.created` | `ResponseCreatedStreamingEvent.json` | provider_event (validated) |
+| `response.custom_tool_call_input.delta` | `ResponseCustomToolCallInputDeltaStreamingEvent.json` | provider_event (pending validation) |
+| `response.custom_tool_call_input.done` | `ResponseCustomToolCallInputDoneStreamingEvent.json` | provider_event (pending validation) |
+| `response.failed` | `ResponseFailedStreamingEvent.json` | provider_event (validated) |
+| `response.file_search_call.completed` | `ResponseFileSearchCallCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `response.file_search_call.in_progress` | `ResponseFileSearchCallInProgressStreamingEvent.json` | provider_event (pending validation) |
+| `response.file_search_call.searching` | `ResponseFileSearchCallSearchingStreamingEvent.json` | provider_event (pending validation) |
+| `response.function_call_arguments.delta` | `ResponseFunctionCallArgumentsDeltaStreamingEvent.json` | provider_event (validated) |
+| `response.function_call_arguments.done` | `ResponseFunctionCallArgumentsDoneStreamingEvent.json` | provider_event (validated) |
+| `response.image_generation_call.completed` | `ResponseImageGenCallCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `response.image_generation_call.generating` | `ResponseImageGenCallGeneratingStreamingEvent.json` | provider_event (pending validation) |
+| `response.image_generation_call.in_progress` | `ResponseImageGenCallInProgressStreamingEvent.json` | provider_event (pending validation) |
+| `response.image_generation_call.partial_image` | `ResponseImageGenCallPartialImageStreamingEvent.json` | provider_event (pending validation) |
+| `response.in_progress` | `ResponseInProgressStreamingEvent.json` | provider_event (validated) |
+| `response.incomplete` | `ResponseIncompleteStreamingEvent.json` | provider_event (validated) |
+| `response.mcp_call.completed` | `ResponseMCPCallCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_call.failed` | `ResponseMCPCallFailedStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_call.in_progress` | `ResponseMCPCallInProgressStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_call_arguments.delta` | `ResponseMCPCallArgumentsDeltaStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_call_arguments.done` | `ResponseMCPCallArgumentsDoneStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_list_tools.completed` | `ResponseMCPListToolsCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_list_tools.failed` | `ResponseMCPListToolsFailedStreamingEvent.json` | provider_event (pending validation) |
+| `response.mcp_list_tools.in_progress` | `ResponseMCPListToolsInProgressStreamingEvent.json` | provider_event (pending validation) |
+| `response.output_item.added` | `ResponseOutputItemAddedStreamingEvent.json` | provider_event (validated) |
+| `response.output_item.done` | `ResponseOutputItemDoneStreamingEvent.json` | provider_event (validated) |
+| `response.output_text.annotation.added` | `ResponseOutputTextAnnotationAddedStreamingEvent.json` | provider_event (validated) |
+| `response.output_text.delta` | `ResponseOutputTextDeltaStreamingEvent.json` | provider_event (validated) |
+| `response.output_text.done` | `ResponseOutputTextDoneStreamingEvent.json` | provider_event (validated) |
+| `response.queued` | `ResponseQueuedStreamingEvent.json` | provider_event (validated) |
+| `response.reasoning.delta` | `ResponseReasoningDeltaStreamingEvent.json` | provider_event (validated) |
+| `response.reasoning.done` | `ResponseReasoningDoneStreamingEvent.json` | provider_event (validated) |
+| `response.reasoning_summary_part.added` | `ResponseReasoningSummaryPartAddedStreamingEvent.json` | provider_event (validated) |
+| `response.reasoning_summary_part.done` | `ResponseReasoningSummaryPartDoneStreamingEvent.json` | provider_event (validated) |
+| `response.reasoning_summary_text.delta` | `ResponseReasoningSummaryDeltaStreamingEvent.json` | provider_event (validated) |
+| `response.reasoning_summary_text.done` | `ResponseReasoningSummaryDoneStreamingEvent.json` | provider_event (validated) |
+| `response.refusal.delta` | `ResponseRefusalDeltaStreamingEvent.json` | provider_event (validated) |
+| `response.refusal.done` | `ResponseRefusalDoneStreamingEvent.json` | provider_event (validated) |
+| `response.shell_call_command.added` | `ResponseShellCallCommandAddedStreamingEvent.json` | provider_event (pending validation) |
+| `response.shell_call_command.delta` | `ResponseShellCallCommandDeltaStreamingEvent.json` | provider_event (pending validation) |
+| `response.shell_call_command.done` | `ResponseShellCallCommandDoneStreamingEvent.json` | provider_event (pending validation) |
+| `response.web_search_call.completed` | `ResponseWebSearchCallCompletedStreamingEvent.json` | provider_event (pending validation) |
+| `response.web_search_call.in_progress` | `ResponseWebSearchCallInProgressStreamingEvent.json` | provider_event (pending validation) |
+| `response.web_search_call.searching` | `ResponseWebSearchCallSearchingStreamingEvent.json` | provider_event (pending validation) |
 
 ## Input item variants
 | item type | schema | mapping |
@@ -326,29 +327,29 @@ Doc discrepancies (resolved)
 ## Output item variants
 | item type | schema | mapping |
 | --- | --- | --- |
-| `apply_patch_call` | `ApplyPatchToolCall.json` | provider_event |
-| `apply_patch_call_output` | `ApplyPatchToolCallOutput.json` | provider_event |
-| `code_interpreter_call` | `CodeInterpreterCall.json` | provider_event |
-| `compaction` | `CompactionBody.json` | provider_event |
-| `computer_call` | `ComputerCall.json` | provider_event |
-| `computer_call_output` | `ComputerCallOutput.json` | provider_event |
-| `custom_tool_call` | `CustomToolCall.json` | provider_event |
-| `custom_tool_call_output` | `CustomToolCallOutput.json` | provider_event |
-| `file_search_call` | `FileSearchCall.json` | provider_event |
-| `function_call` | `FunctionCall.json` | provider_event |
-| `function_call_output` | `FunctionCallOutput.json` | provider_event |
-| `image_generation_call` | `ImageGenCall.json` | provider_event |
-| `local_shell_call` | `LocalShellCall.json` | provider_event |
-| `local_shell_call_output` | `LocalShellCallOutput.json` | provider_event |
-| `mcp_approval_request` | `MCPApprovalRequest.json` | provider_event |
-| `mcp_approval_response` | `MCPApprovalResponse.json` | provider_event |
-| `mcp_call` | `MCPToolCall.json` | provider_event |
-| `mcp_list_tools` | `MCPListTools.json` | provider_event |
-| `message` | `Message.json` | provider_event |
-| `reasoning` | `ReasoningBody.json` | provider_event |
-| `shell_call` | `FunctionShellCall.json` | provider_event |
-| `shell_call_output` | `FunctionShellCallOutput.json` | provider_event |
-| `web_search_call` | `WebSearchCall.json` | provider_event |
+| `apply_patch_call` | `ApplyPatchToolCall.json` | provider_event (pending validation) |
+| `apply_patch_call_output` | `ApplyPatchToolCallOutput.json` | provider_event (pending validation) |
+| `code_interpreter_call` | `CodeInterpreterCall.json` | provider_event (pending validation) |
+| `compaction` | `CompactionBody.json` | provider_event (pending validation) |
+| `computer_call` | `ComputerCall.json` | provider_event (pending validation) |
+| `computer_call_output` | `ComputerCallOutput.json` | provider_event (pending validation) |
+| `custom_tool_call` | `CustomToolCall.json` | provider_event (pending validation) |
+| `custom_tool_call_output` | `CustomToolCallOutput.json` | provider_event (pending validation) |
+| `file_search_call` | `FileSearchCall.json` | provider_event (pending validation) |
+| `function_call` | `FunctionCall.json` | provider_event (validated) |
+| `function_call_output` | `FunctionCallOutput.json` | provider_event (validated) |
+| `image_generation_call` | `ImageGenCall.json` | provider_event (pending validation) |
+| `local_shell_call` | `LocalShellCall.json` | provider_event (pending validation) |
+| `local_shell_call_output` | `LocalShellCallOutput.json` | provider_event (pending validation) |
+| `mcp_approval_request` | `MCPApprovalRequest.json` | provider_event (pending validation) |
+| `mcp_approval_response` | `MCPApprovalResponse.json` | provider_event (pending validation) |
+| `mcp_call` | `MCPToolCall.json` | provider_event (pending validation) |
+| `mcp_list_tools` | `MCPListTools.json` | provider_event (pending validation) |
+| `message` | `Message.json` | provider_event (validated) |
+| `reasoning` | `ReasoningBody.json` | provider_event (validated) |
+| `shell_call` | `FunctionShellCall.json` | provider_event (pending validation) |
+| `shell_call_output` | `FunctionShellCallOutput.json` | provider_event (pending validation) |
+| `web_search_call` | `WebSearchCall.json` | provider_event (pending validation) |
 
 ## Schema index (all components)
 
@@ -412,8 +413,8 @@ Legend
 | `ApplyPatchDeleteFileOperation` | no | no | pending |
 | `ApplyPatchDeleteFileOperationParam` | no | no | pending |
 | `ApplyPatchOperationParam` | no | no | pending |
-| `ApplyPatchToolCall` | no | no | pending |
-| `ApplyPatchToolCallOutput` | no | no | pending |
+| `ApplyPatchToolCall` | no | no | provider_event (pending validation) |
+| `ApplyPatchToolCallOutput` | no | no | provider_event (pending validation) |
 | `ApplyPatchUpdateFileOperation` | no | no | pending |
 | `ApplyPatchUpdateFileOperationParam` | no | no | pending |
 | `ApproximateLocation` | no | no | pending |
@@ -422,7 +423,7 @@ Legend
 | `ClickAction` | no | no | pending |
 | `ClickButtonType` | no | no | pending |
 | `ClickParam` | no | no | pending |
-| `CodeInterpreterCall` | no | no | pending |
+| `CodeInterpreterCall` | no | no | provider_event (pending validation) |
 | `CodeInterpreterCallStatus` | no | no | pending |
 | `CodeInterpreterOutputImage` | no | no | pending |
 | `CodeInterpreterOutputLogs` | no | no | pending |
@@ -430,7 +431,7 @@ Legend
 | `CodeInterpreterToolCallOutputLogsParam` | no | no | pending |
 | `CompactResource` | no | no | pending |
 | `CompactResponseMethodPublicBody` | no | no | pending |
-| `CompactionBody` | no | no | pending |
+| `CompactionBody` | no | no | provider_event (pending validation) |
 | `ComparisonFilterFieldCONTAINS` | no | no | pending |
 | `ComparisonFilterFieldCONTAINSANY` | no | no | pending |
 | `ComparisonFilterFieldEQ` | no | no | pending |
@@ -459,8 +460,8 @@ Legend
 | `CompoundFilterFieldOR` | no | no | pending |
 | `CompoundFilterParamAndParam` | no | no | pending |
 | `CompoundFilterParamOrParam` | no | no | pending |
-| `ComputerCall` | no | no | pending |
-| `ComputerCallOutput` | no | no | pending |
+| `ComputerCall` | no | no | provider_event (pending validation) |
+| `ComputerCallOutput` | no | no | provider_event (pending validation) |
 | `ComputerCallOutputStatus` | no | no | pending |
 | `ComputerCallSafetyCheckParam` | no | no | pending |
 | `ComputerEnvironment` | no | no | pending |
@@ -485,8 +486,8 @@ Legend
 | `CustomGrammarFormatParam` | no | no | pending |
 | `CustomTextFormatField` | no | no | pending |
 | `CustomTextFormatParam` | no | no | pending |
-| `CustomToolCall` | no | no | pending |
-| `CustomToolCallOutput` | no | no | pending |
+| `CustomToolCall` | no | no | provider_event (pending validation) |
+| `CustomToolCallOutput` | no | no | provider_event (pending validation) |
 | `CustomToolFormat` | no | no | pending |
 | `DeletedResponseResource` | no | no | pending |
 | `DeletedVideoResource` | no | no | pending |
@@ -506,22 +507,22 @@ Legend
 | `ExcludeEnum` | no | no | pending |
 | `FileCitationBody` | no | no | pending |
 | `FileCitationParam` | no | no | pending |
-| `FileSearchCall` | no | no | pending |
+| `FileSearchCall` | no | no | provider_event (pending validation) |
 | `FileSearchRankingOptionsParam` | no | no | pending |
 | `FileSearchResult` | no | no | pending |
 | `FileSearchRetrievedChunksParam` | no | no | pending |
 | `FileSearchToolCallStatusEnum` | no | no | pending |
 | `Filters` | no | no | pending |
-| `FunctionCall` | yes | yes | pending |
+| `FunctionCall` | yes | yes | provider_event (validated) |
 | `FunctionCallItemStatus` | yes | no | pending |
-| `FunctionCallOutput` | yes | yes | pending |
+| `FunctionCallOutput` | yes | yes | provider_event (validated) |
 | `FunctionCallOutputStatusEnum` | yes | yes | pending |
 | `FunctionCallStatus` | yes | yes | pending |
 | `FunctionShellAction` | no | no | pending |
 | `FunctionShellActionParam` | no | no | pending |
-| `FunctionShellCall` | no | no | pending |
+| `FunctionShellCall` | no | no | provider_event (pending validation) |
 | `FunctionShellCallItemStatus` | no | no | pending |
-| `FunctionShellCallOutput` | no | no | pending |
+| `FunctionShellCallOutput` | no | no | provider_event (pending validation) |
 | `FunctionShellCallOutputContent` | no | no | pending |
 | `FunctionShellCallOutputContentParam` | no | no | pending |
 | `FunctionShellCallOutputExitOutcome` | no | no | pending |
@@ -540,7 +541,7 @@ Legend
 | `ImageDetail` | yes | yes | pending |
 | `ImageGenAction` | no | no | pending |
 | `ImageGenActionEnum` | no | no | pending |
-| `ImageGenCall` | no | no | pending |
+| `ImageGenCall` | no | no | provider_event (pending validation) |
 | `ImageGenCallStatus` | no | no | pending |
 | `ImageGenInputUsageDetails` | no | no | pending |
 | `ImageGenOutputTokensDetails` | no | no | pending |
@@ -576,26 +577,26 @@ Legend
 | `KeyPressAction` | no | no | pending |
 | `KeyPressParam` | no | no | pending |
 | `LocalFileEnvironmentParam` | no | no | pending |
-| `LocalShellCall` | no | no | pending |
+| `LocalShellCall` | no | no | provider_event (pending validation) |
 | `LocalShellCallItemStatus` | no | no | pending |
-| `LocalShellCallOutput` | no | no | pending |
+| `LocalShellCallOutput` | no | no | provider_event (pending validation) |
 | `LocalShellCallOutputStatusEnum` | no | no | pending |
 | `LocalShellCallStatus` | no | no | pending |
 | `LocalShellExecAction` | no | no | pending |
 | `LocalShellExecActionParam` | no | no | pending |
 | `LogProb` | yes | yes | pending |
-| `MCPApprovalRequest` | no | no | pending |
-| `MCPApprovalResponse` | no | no | pending |
-| `MCPListTools` | no | no | pending |
+| `MCPApprovalRequest` | no | no | provider_event (pending validation) |
+| `MCPApprovalResponse` | no | no | provider_event (pending validation) |
+| `MCPListTools` | no | no | provider_event (pending validation) |
 | `MCPRequireApprovalApiEnum` | no | no | pending |
 | `MCPRequireApprovalFieldEnum` | no | no | pending |
 | `MCPRequireApprovalFilterField` | no | no | pending |
 | `MCPRequireApprovalFilterParam` | no | no | pending |
-| `MCPToolCall` | no | no | pending |
+| `MCPToolCall` | no | no | provider_event (pending validation) |
 | `MCPToolCallStatus` | no | no | pending |
 | `MCPToolFilterField` | no | no | pending |
 | `MCPToolFilterParam` | no | no | pending |
-| `Message` | yes | yes | pending |
+| `Message` | yes | yes | provider_event (validated) |
 | `MessageRole` | yes | yes | pending |
 | `MessageRole1` | no | no | pending |
 | `MessageStatus` | yes | yes | pending |
@@ -612,7 +613,7 @@ Legend
 | `RankerVersionType` | no | no | pending |
 | `RankingOptions` | no | no | pending |
 | `Reasoning` | yes | yes | pending |
-| `ReasoningBody` | yes | yes | pending |
+| `ReasoningBody` | yes | yes | provider_event (validated) |
 | `ReasoningEffortEnum` | yes | yes | pending |
 | `ReasoningParam` | yes | no | pending |
 | `ReasoningSummaryContentParam` | yes | no | pending |
@@ -668,7 +669,7 @@ Legend
 | `VideoStatus` | no | no | pending |
 | `WaitAction` | no | no | pending |
 | `WaitParam` | no | no | pending |
-| `WebSearchCall` | no | no | pending |
+| `WebSearchCall` | no | no | provider_event (pending validation) |
 | `WebSearchCallActionFindInPage` | no | no | pending |
 | `WebSearchCallActionFindInPageParam` | no | no | pending |
 | `WebSearchCallActionOpenPage` | no | no | pending |
