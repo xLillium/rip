@@ -62,12 +62,9 @@ static CREATE_RESPONSE_VALIDATOR: Lazy<JSONSchema> = Lazy::new(|| {
         .expect("compile create response schema")
 });
 
-// jsonschema rejects ItemParam oneOf with multiple message roles; validate each variant directly.
-static ITEM_PARAM_VARIANTS: Lazy<Vec<(String, JSONSchema)>> =
-    Lazy::new(|| build_component_variant_validators("ItemParam"));
-
 const TOOL_CHOICE_VALUES: [&str; 3] = ["auto", "required", "none"];
 const COMPUTER_ENVIRONMENTS: [&str; 4] = ["windows", "mac", "linux", "browser"];
+const MESSAGE_ROLES: [&str; 4] = ["assistant", "developer", "system", "user"];
 
 pub fn openapi() -> &'static Value {
     &OPENAPI
@@ -328,30 +325,162 @@ pub fn validate_specific_tool_choice_param(value: &Value) -> Result<(), Vec<Stri
 }
 
 pub fn validate_item_param(value: &Value) -> Result<(), Vec<String>> {
-    validate_variants("ItemParam", value, &ITEM_PARAM_VARIANTS)
-}
-
-fn validate_variants(
-    label: &str,
-    value: &Value,
-    variants: &[(String, JSONSchema)],
-) -> Result<(), Vec<String>> {
-    let mut matches = 0;
     let mut errors = Vec::new();
-    for (name, validator) in variants.iter() {
-        match validator.validate(value) {
-            Ok(_) => matches += 1,
-            Err(errs) => errors.extend(errs.map(|e| format!("{name}: {e}"))),
-        }
+    let map = match value.as_object() {
+        Some(map) => map,
+        None => return Err(vec!["ItemParam must be an object".to_string()]),
+    };
+
+    let type_value = map.get("type");
+    let item_type = type_value.and_then(|value| value.as_str());
+
+    if item_type.is_none() || item_type == Some("item_reference") {
+        return validate_item_reference(map, type_value);
     }
-    if matches == 1 {
+
+    match item_type.unwrap() {
+        "message" => {
+            let context = "ItemParam(message)";
+            match require_field(map, "role", context, &mut errors) {
+                Some(Value::String(role)) => {
+                    if !MESSAGE_ROLES.contains(&role.as_str()) {
+                        errors.push(format!(
+                            "{context}.role must be one of {}",
+                            MESSAGE_ROLES.join(", ")
+                        ));
+                    }
+                }
+                Some(_) => errors.push(format!("{context}.role must be a string")),
+                None => {}
+            }
+            match require_field(map, "content", context, &mut errors) {
+                Some(Value::String(_)) | Some(Value::Array(_)) => {}
+                Some(_) => errors.push(format!("{context}.content must be a string or array")),
+                None => {}
+            }
+        }
+        "function_call" => {
+            let context = "ItemParam(function_call)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_string_field(map, "name", context, &mut errors);
+            require_string_field(map, "arguments", context, &mut errors);
+        }
+        "function_call_output" => {
+            let context = "ItemParam(function_call_output)";
+            require_string_field(map, "call_id", context, &mut errors);
+            match require_field(map, "output", context, &mut errors) {
+                Some(Value::String(_)) | Some(Value::Array(_)) => {}
+                Some(_) => errors.push(format!("{context}.output must be a string or array")),
+                None => {}
+            }
+        }
+        "reasoning" => {
+            let context = "ItemParam(reasoning)";
+            require_array_field(map, "summary", context, &mut errors);
+        }
+        "compaction" => {
+            let context = "ItemParam(compaction)";
+            require_string_field(map, "encrypted_content", context, &mut errors);
+        }
+        "code_interpreter_call" => {
+            let context = "ItemParam(code_interpreter_call)";
+            require_string_field(map, "id", context, &mut errors);
+            require_string_field(map, "container_id", context, &mut errors);
+            require_string_field(map, "code", context, &mut errors);
+        }
+        "computer_call" => {
+            let context = "ItemParam(computer_call)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_object_field(map, "action", context, &mut errors);
+        }
+        "computer_call_output" => {
+            let context = "ItemParam(computer_call_output)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_object_field(map, "output", context, &mut errors);
+        }
+        "custom_tool_call" => {
+            let context = "ItemParam(custom_tool_call)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_string_field(map, "name", context, &mut errors);
+            require_string_field(map, "input", context, &mut errors);
+        }
+        "custom_tool_call_output" => {
+            let context = "ItemParam(custom_tool_call_output)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_string_field(map, "output", context, &mut errors);
+        }
+        "file_search_call" => {
+            let context = "ItemParam(file_search_call)";
+            require_string_field(map, "id", context, &mut errors);
+            match require_field(map, "queries", context, &mut errors) {
+                Some(Value::Array(items)) => {
+                    if items.is_empty() {
+                        errors.push(format!("{context}.queries must not be empty"));
+                    }
+                    for (idx, item) in items.iter().enumerate() {
+                        if !item.is_string() {
+                            errors.push(format!("{context}.queries[{idx}] must be a string"));
+                        }
+                    }
+                }
+                Some(_) => errors.push(format!("{context}.queries must be an array")),
+                None => {}
+            }
+        }
+        "web_search_call" => {}
+        "image_generation_call" => {
+            let context = "ItemParam(image_generation_call)";
+            require_string_field(map, "id", context, &mut errors);
+        }
+        "local_shell_call" => {
+            let context = "ItemParam(local_shell_call)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_object_field(map, "action", context, &mut errors);
+        }
+        "local_shell_call_output" => {
+            let context = "ItemParam(local_shell_call_output)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_string_field(map, "output", context, &mut errors);
+        }
+        "shell_call" => {
+            let context = "ItemParam(shell_call)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_object_field(map, "action", context, &mut errors);
+        }
+        "shell_call_output" => {
+            let context = "ItemParam(shell_call_output)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_array_field(map, "output", context, &mut errors);
+        }
+        "apply_patch_call" => {
+            let context = "ItemParam(apply_patch_call)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_string_field(map, "status", context, &mut errors);
+            require_object_field(map, "operation", context, &mut errors);
+        }
+        "apply_patch_call_output" => {
+            let context = "ItemParam(apply_patch_call_output)";
+            require_string_field(map, "call_id", context, &mut errors);
+            require_string_field(map, "status", context, &mut errors);
+        }
+        "mcp_approval_request" => {
+            let context = "ItemParam(mcp_approval_request)";
+            require_string_field(map, "server_label", context, &mut errors);
+            require_string_field(map, "name", context, &mut errors);
+            require_string_field(map, "arguments", context, &mut errors);
+        }
+        "mcp_approval_response" => {
+            let context = "ItemParam(mcp_approval_response)";
+            require_string_field(map, "approval_request_id", context, &mut errors);
+            require_bool_field(map, "approve", context, &mut errors);
+        }
+        other => errors.push(format!("ItemParam.type has unsupported value \"{other}\"")),
+    }
+
+    if errors.is_empty() {
         Ok(())
-    } else if matches == 0 {
-        Err(errors)
     } else {
-        Err(vec![format!(
-            "{label} matches multiple schemas ({matches})"
-        )])
+        Err(errors)
     }
 }
 
@@ -405,6 +534,72 @@ fn require_positive_integer_field(
     }
 }
 
+fn require_array_field(
+    map: &serde_json::Map<String, Value>,
+    field: &str,
+    context: &str,
+    errors: &mut Vec<String>,
+) {
+    match require_field(map, field, context, errors) {
+        Some(Value::Array(_)) => {}
+        Some(_) => errors.push(format!("{context}.{field} must be an array")),
+        None => {}
+    }
+}
+
+fn require_object_field(
+    map: &serde_json::Map<String, Value>,
+    field: &str,
+    context: &str,
+    errors: &mut Vec<String>,
+) {
+    match require_field(map, field, context, errors) {
+        Some(Value::Object(_)) => {}
+        Some(_) => errors.push(format!("{context}.{field} must be an object")),
+        None => {}
+    }
+}
+
+fn require_bool_field(
+    map: &serde_json::Map<String, Value>,
+    field: &str,
+    context: &str,
+    errors: &mut Vec<String>,
+) {
+    match require_field(map, field, context, errors) {
+        Some(Value::Bool(_)) => {}
+        Some(_) => errors.push(format!("{context}.{field} must be a boolean")),
+        None => {}
+    }
+}
+
+fn validate_item_reference(
+    map: &serde_json::Map<String, Value>,
+    type_value: Option<&Value>,
+) -> Result<(), Vec<String>> {
+    let mut errors = Vec::new();
+    if let Some(type_value) = type_value {
+        match type_value {
+            Value::Null => {}
+            Value::String(value) => {
+                if value != "item_reference" {
+                    errors.push(
+                        "ItemReferenceParam.type must be \"item_reference\" when provided"
+                            .to_string(),
+                    );
+                }
+            }
+            _ => errors.push("ItemReferenceParam.type must be a string or null".to_string()),
+        }
+    }
+    require_string_field(map, "id", "ItemReferenceParam", &mut errors);
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
+}
+
 fn validate_specific_tool_choice(value: &Value) -> Result<(), Vec<String>> {
     let mut errors = Vec::new();
     let map = match value.as_object() {
@@ -455,40 +650,6 @@ fn validate_specific_tool_choice(value: &Value) -> Result<(), Vec<String>> {
     } else {
         Err(errors)
     }
-}
-
-fn component_oneof_refs(component_name: &str) -> Vec<String> {
-    let schema = extract_component_schema(component_name)
-        .unwrap_or_else(|| panic!("schema missing: {component_name}"));
-    schema
-        .get("oneOf")
-        .and_then(|value| value.as_array())
-        .expect("oneOf variants")
-        .iter()
-        .filter_map(|item| item.get("$ref").and_then(|value| value.as_str()))
-        .filter_map(|ref_name| ref_name.rsplit('/').next().map(|name| name.to_string()))
-        .collect()
-}
-
-fn compile_component_validators(names: Vec<String>) -> Vec<(String, JSONSchema)> {
-    names
-        .into_iter()
-        .map(|name| {
-            let schema = serde_json::json!({
-                "$ref": format!("{OPENAPI_URI}#/components/schemas/{name}")
-            });
-            let validator = JSONSchema::options()
-                .with_document(OPENAPI_URI.to_string(), OPENAPI.clone())
-                .compile(&schema)
-                .expect("compile schema variant");
-            (name, validator)
-        })
-        .collect()
-}
-
-fn build_component_variant_validators(component_name: &str) -> Vec<(String, JSONSchema)> {
-    let variants = component_oneof_refs(component_name);
-    compile_component_validators(variants)
 }
 
 fn extract_streaming_schema() -> Option<Value> {
@@ -735,9 +896,348 @@ mod tests {
     }
 
     #[test]
+    fn validate_item_param_accepts_all_variants() {
+        let variants = vec![
+            serde_json::json!({ "type": "message", "role": "assistant", "content": "hi" }),
+            serde_json::json!({ "type": "message", "role": "developer", "content": "hi" }),
+            serde_json::json!({ "type": "message", "role": "system", "content": "hi" }),
+            serde_json::json!({ "type": "message", "role": "user", "content": "hi" }),
+            serde_json::json!({ "type": "function_call", "call_id": "c1", "name": "echo", "arguments": "{}" }),
+            serde_json::json!({ "type": "function_call_output", "call_id": "c1", "output": "ok" }),
+            serde_json::json!({ "type": "reasoning", "summary": [] }),
+            serde_json::json!({ "type": "compaction", "encrypted_content": "enc" }),
+            serde_json::json!({ "type": "code_interpreter_call", "id": "ci1", "container_id": "cntr_1", "code": "print(1)" }),
+            serde_json::json!({ "type": "computer_call", "call_id": "cc1", "action": {} }),
+            serde_json::json!({ "type": "computer_call_output", "call_id": "cc1", "output": {} }),
+            serde_json::json!({ "type": "custom_tool_call", "call_id": "ct1", "name": "tool", "input": "in" }),
+            serde_json::json!({ "type": "custom_tool_call_output", "call_id": "ct1", "output": "out" }),
+            serde_json::json!({ "type": "file_search_call", "id": "fs1", "queries": ["q1"] }),
+            serde_json::json!({ "type": "web_search_call" }),
+            serde_json::json!({ "type": "image_generation_call", "id": "ig1" }),
+            serde_json::json!({ "type": "local_shell_call", "call_id": "ls1", "action": {} }),
+            serde_json::json!({ "type": "local_shell_call_output", "call_id": "ls1", "output": "ok" }),
+            serde_json::json!({ "type": "shell_call", "call_id": "sh1", "action": {} }),
+            serde_json::json!({ "type": "shell_call_output", "call_id": "sh1", "output": [] }),
+            serde_json::json!({ "type": "apply_patch_call", "call_id": "ap1", "status": "in_progress", "operation": {} }),
+            serde_json::json!({ "type": "apply_patch_call_output", "call_id": "ap1", "status": "completed" }),
+            serde_json::json!({ "type": "mcp_approval_request", "server_label": "srv", "name": "tool", "arguments": "{}" }),
+            serde_json::json!({ "type": "mcp_approval_response", "approval_request_id": "ar1", "approve": true }),
+            serde_json::json!({ "id": "item_1" }),
+            serde_json::json!({ "type": "item_reference", "id": "item_2" }),
+        ];
+
+        for value in variants {
+            let errors = validate_item_param(&value).err().unwrap_or_default();
+            assert!(errors.is_empty(), "errors: {errors:?} for {value}");
+        }
+    }
+
+    #[test]
     fn validate_item_param_rejects_invalid_type() {
         let value = serde_json::json!("nope");
         assert!(validate_item_param(&value).is_err());
+    }
+
+    #[test]
+    fn validate_item_param_reports_missing_required_fields() {
+        let value = serde_json::json!({ "type": "function_call" });
+        let errors = validate_item_param(&value).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("missing required field `call_id`")),
+            "errors: {errors:?}"
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("missing required field `name`")),
+            "errors: {errors:?}"
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("missing required field `arguments`")),
+            "errors: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_item_param_reports_invalid_field_types() {
+        let message = serde_json::json!({
+            "type": "message",
+            "role": 123,
+            "content": 456
+        });
+        let errors = validate_item_param(&message).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("role must be a string")),
+            "errors: {errors:?}"
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("content must be a string or array")),
+            "errors: {errors:?}"
+        );
+
+        let invalid_role = serde_json::json!({
+            "type": "message",
+            "role": "invalid",
+            "content": "hi"
+        });
+        let errors = validate_item_param(&invalid_role).err().unwrap_or_default();
+        assert!(
+            errors.iter().any(|err| err.contains("role must be one of")),
+            "errors: {errors:?}"
+        );
+
+        let reasoning = serde_json::json!({
+            "type": "reasoning",
+            "summary": "nope"
+        });
+        let errors = validate_item_param(&reasoning).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("summary must be an array")),
+            "errors: {errors:?}"
+        );
+
+        let computer_call = serde_json::json!({
+            "type": "computer_call",
+            "call_id": "cc1",
+            "action": "nope"
+        });
+        let errors = validate_item_param(&computer_call)
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("action must be an object")),
+            "errors: {errors:?}"
+        );
+
+        let approval = serde_json::json!({
+            "type": "mcp_approval_response",
+            "approval_request_id": "ar1",
+            "approve": "yes"
+        });
+        let errors = validate_item_param(&approval).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("approve must be a boolean")),
+            "errors: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_item_param_reports_file_search_query_errors() {
+        let empty_queries = serde_json::json!({
+            "type": "file_search_call",
+            "id": "fs1",
+            "queries": []
+        });
+        let errors = validate_item_param(&empty_queries)
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("queries must not be empty")),
+            "errors: {errors:?}"
+        );
+
+        let bad_query = serde_json::json!({
+            "type": "file_search_call",
+            "id": "fs1",
+            "queries": ["ok", 1]
+        });
+        let errors = validate_item_param(&bad_query).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("queries[1] must be a string")),
+            "errors: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_item_param_reports_item_reference_errors() {
+        let value = serde_json::json!({
+            "type": 123,
+            "id": "item_1"
+        });
+        let errors = validate_item_param(&value).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("ItemReferenceParam.type must be a string or null")),
+            "errors: {errors:?}"
+        );
+
+        let missing_id = serde_json::json!({
+            "type": null
+        });
+        let errors = validate_item_param(&missing_id).err().unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("missing required field `id`")),
+            "errors: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_item_param_reports_unknown_type() {
+        let value = serde_json::json!({
+            "type": "unknown"
+        });
+        let errors = validate_item_param(&value).err().unwrap_or_default();
+        assert!(
+            errors.iter().any(|err| err.contains("unsupported value")),
+            "errors: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_item_param_reports_additional_type_errors() {
+        let function_call = serde_json::json!({
+            "type": "function_call",
+            "call_id": 1,
+            "name": 2,
+            "arguments": 3
+        });
+        let errors = validate_item_param(&function_call)
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("call_id must be a string")),
+            "errors: {errors:?}"
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("name must be a string")),
+            "errors: {errors:?}"
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("arguments must be a string")),
+            "errors: {errors:?}"
+        );
+
+        let function_call_output = serde_json::json!({
+            "type": "function_call_output",
+            "call_id": "c1",
+            "output": { "ok": true }
+        });
+        let errors = validate_item_param(&function_call_output)
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("output must be a string or array")),
+            "errors: {errors:?}"
+        );
+
+        let file_search_call = serde_json::json!({
+            "type": "file_search_call",
+            "id": "fs1",
+            "queries": "nope"
+        });
+        let errors = validate_item_param(&file_search_call)
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("queries must be an array")),
+            "errors: {errors:?}"
+        );
+
+        let custom_tool_call_output = serde_json::json!({
+            "type": "custom_tool_call_output",
+            "call_id": "ct1",
+            "output": 1
+        });
+        let errors = validate_item_param(&custom_tool_call_output)
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("output must be a string")),
+            "errors: {errors:?}"
+        );
+    }
+
+    #[test]
+    fn validate_helper_error_paths() {
+        let reference = serde_json::json!({
+            "type": "not_item_reference",
+            "id": "item_1"
+        });
+        let errors = validate_item_reference(reference.as_object().unwrap(), reference.get("type"))
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("ItemReferenceParam.type must be")),
+            "errors: {errors:?}"
+        );
+
+        let errors = validate_specific_tool_choice(&serde_json::json!({ "name": "tool" }))
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("SpecificToolChoiceParam.type must be a string")),
+            "errors: {errors:?}"
+        );
+
+        let errors = validate_specific_tool_choice(&serde_json::json!({ "type": "unknown" }))
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors.iter().any(|err| err.contains("unsupported value")),
+            "errors: {errors:?}"
+        );
+
+        let errors = validate_specific_tool_choice(&serde_json::json!("nope"))
+            .err()
+            .unwrap_or_default();
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("SpecificToolChoiceParam must be an object")),
+            "errors: {errors:?}"
+        );
+
+        let value = serde_json::json!({ "display_width": 0 });
+        let mut errors = Vec::new();
+        require_positive_integer_field(
+            value.as_object().unwrap(),
+            "display_width",
+            "Test",
+            &mut errors,
+        );
+        assert!(
+            errors
+                .iter()
+                .any(|err| err.contains("must be a positive integer")),
+            "errors: {errors:?}"
+        );
     }
 
     #[test]

@@ -32,7 +32,7 @@ Implementation status (current)
 - Provider request builder validates CreateResponseBody payloads (errors captured; payload preserved); tool fields use per-variant validation to avoid jsonschema oneOf failures; request sending is not wired yet.
 - Tool schema validation is available for all `ResponsesToolParam` and `ToolChoiceParam` variants using manual required-field checks; bundled OpenAPI only includes function tool variants.
 - Input item variants are not yet mapped to internal request frames (pending).
-- ItemParam validation is available for request assembly using per-variant checks (jsonschema rejects the oneOf with multiple message roles); unknown item types still require raw passthrough.
+- ItemParam validation covers all input variants using manual required-field checks (message role/item reference handling included); internal request-frame mapping is still pending.
 - Requests are JSON-only per spec; form-encoded bodies are not supported (ADR-0002).
 - Bundled OpenAPI schema currently includes 102 component schemas; the split OpenResponses schema defines 412 component schemas. Missing schemas are tracked in the checklist.
 - Split schemas + additive patches are authoritative; the filter manifest represents a reduced allowlist and is not a compliance target.
@@ -293,31 +293,31 @@ Doc discrepancies (resolved)
 ## Input item variants
 | item type | schema | mapping |
 | --- | --- | --- |
-| `apply_patch_call` | `ApplyPatchToolCallItemParam.json` | pending (request mapping) |
-| `apply_patch_call_output` | `ApplyPatchToolCallOutputItemParam.json` | pending (request mapping) |
-| `code_interpreter_call` | `CodeInterpreterCallItemParam.json` | pending (request mapping) |
-| `compaction` | `CompactionSummaryItemParam.json` | pending (request mapping) |
-| `computer_call` | `ComputerCallItemParam.json` | pending (request mapping) |
-| `computer_call_output` | `ComputerCallOutputItemParam.json` | pending (request mapping) |
-| `custom_tool_call` | `CustomToolCallItemParam.json` | pending (request mapping) |
-| `custom_tool_call_output` | `CustomToolCallOutputItemParam.json` | pending (request mapping) |
-| `file_search_call` | `FileSearchCallItemParam.json` | pending (request mapping) |
-| `function_call` | `FunctionCallItemParam.json` | pending (request mapping) |
-| `function_call_output` | `FunctionCallOutputItemParam.json` | pending (request mapping) |
-| `image_generation_call` | `ImageGenCallItemParam.json` | pending (request mapping) |
-| `local_shell_call` | `LocalShellCallItemParam.json` | pending (request mapping) |
-| `local_shell_call_output` | `LocalShellCallOutputItemParam.json` | pending (request mapping) |
-| `mcp_approval_request` | `MCPApprovalRequestItemParam.json` | pending (request mapping) |
-| `mcp_approval_response` | `MCPApprovalResponseItemParam.json` | pending (request mapping) |
-| `message` | `AssistantMessageItemParam.json` | pending (request mapping) |
-| `message` | `DeveloperMessageItemParam.json` | pending (request mapping) |
-| `message` | `SystemMessageItemParam.json` | pending (request mapping) |
-| `message` | `UserMessageItemParam.json` | pending (request mapping) |
-| `reasoning` | `ReasoningItemParam.json` | pending (request mapping) |
-| `shell_call` | `FunctionShellCallItemParam.json` | pending (request mapping) |
-| `shell_call_output` | `FunctionShellCallOutputItemParam.json` | pending (request mapping) |
-| `unknown` | `ItemReferenceParam.json` | pending (request mapping) |
-| `web_search_call` | `WebSearchCallItemParam.json` | pending (request mapping) |
+| `apply_patch_call` | `ApplyPatchToolCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `apply_patch_call_output` | `ApplyPatchToolCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
+| `code_interpreter_call` | `CodeInterpreterCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `compaction` | `CompactionSummaryItemParam.json` | provider_request (validated; internal mapping pending) |
+| `computer_call` | `ComputerCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `computer_call_output` | `ComputerCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
+| `custom_tool_call` | `CustomToolCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `custom_tool_call_output` | `CustomToolCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
+| `file_search_call` | `FileSearchCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `function_call` | `FunctionCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `function_call_output` | `FunctionCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
+| `image_generation_call` | `ImageGenCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `local_shell_call` | `LocalShellCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `local_shell_call_output` | `LocalShellCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
+| `mcp_approval_request` | `MCPApprovalRequestItemParam.json` | provider_request (validated; internal mapping pending) |
+| `mcp_approval_response` | `MCPApprovalResponseItemParam.json` | provider_request (validated; internal mapping pending) |
+| `message` | `AssistantMessageItemParam.json` | provider_request (validated; internal mapping pending) |
+| `message` | `DeveloperMessageItemParam.json` | provider_request (validated; internal mapping pending) |
+| `message` | `SystemMessageItemParam.json` | provider_request (validated; internal mapping pending) |
+| `message` | `UserMessageItemParam.json` | provider_request (validated; internal mapping pending) |
+| `reasoning` | `ReasoningItemParam.json` | provider_request (validated; internal mapping pending) |
+| `shell_call` | `FunctionShellCallItemParam.json` | provider_request (validated; internal mapping pending) |
+| `shell_call_output` | `FunctionShellCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
+| `unknown` | `ItemReferenceParam.json` | provider_request (validated; internal mapping pending) |
+| `web_search_call` | `WebSearchCallItemParam.json` | provider_request (validated; internal mapping pending) |
 
 ## Output item variants
 | item type | schema | mapping |
@@ -367,31 +367,31 @@ Legend
 ### Input item params
 | schema | bundled | validated | status |
 | --- | --- | --- | --- |
-| `ApplyPatchToolCallItemParam` | no | no | pending |
-| `ApplyPatchToolCallOutputItemParam` | no | no | pending |
-| `AssistantMessageItemParam` | yes | no | pending |
-| `CodeInterpreterCallItemParam` | no | no | pending |
-| `CompactionSummaryItemParam` | no | no | pending |
-| `ComputerCallItemParam` | no | no | pending |
-| `ComputerCallOutputItemParam` | no | no | pending |
-| `CustomToolCallItemParam` | no | no | pending |
-| `CustomToolCallOutputItemParam` | no | no | pending |
-| `DeveloperMessageItemParam` | yes | no | pending |
-| `FileSearchCallItemParam` | no | no | pending |
-| `FunctionCallItemParam` | yes | no | pending |
-| `FunctionCallOutputItemParam` | yes | no | pending |
-| `FunctionShellCallItemParam` | no | no | pending |
-| `FunctionShellCallOutputItemParam` | no | no | pending |
-| `ImageGenCallItemParam` | no | no | pending |
-| `ItemParam` | yes | no | provider_request (validated) |
-| `LocalShellCallItemParam` | no | no | pending |
-| `LocalShellCallOutputItemParam` | no | no | pending |
-| `MCPApprovalRequestItemParam` | no | no | pending |
-| `MCPApprovalResponseItemParam` | no | no | pending |
-| `ReasoningItemParam` | yes | no | pending |
-| `SystemMessageItemParam` | yes | no | pending |
-| `UserMessageItemParam` | yes | no | pending |
-| `WebSearchCallItemParam` | no | no | pending |
+| `ApplyPatchToolCallItemParam` | no | no | provider_request (validated) | 
+| `ApplyPatchToolCallOutputItemParam` | no | no | provider_request (validated) | 
+| `AssistantMessageItemParam` | yes | no | provider_request (validated) | 
+| `CodeInterpreterCallItemParam` | no | no | provider_request (validated) | 
+| `CompactionSummaryItemParam` | no | no | provider_request (validated) | 
+| `ComputerCallItemParam` | no | no | provider_request (validated) | 
+| `ComputerCallOutputItemParam` | no | no | provider_request (validated) | 
+| `CustomToolCallItemParam` | no | no | provider_request (validated) | 
+| `CustomToolCallOutputItemParam` | no | no | provider_request (validated) | 
+| `DeveloperMessageItemParam` | yes | no | provider_request (validated) | 
+| `FileSearchCallItemParam` | no | no | provider_request (validated) | 
+| `FunctionCallItemParam` | yes | no | provider_request (validated) | 
+| `FunctionCallOutputItemParam` | yes | no | provider_request (validated) | 
+| `FunctionShellCallItemParam` | no | no | provider_request (validated) | 
+| `FunctionShellCallOutputItemParam` | no | no | provider_request (validated) | 
+| `ImageGenCallItemParam` | no | no | provider_request (validated) | 
+| `ItemParam` | yes | no | provider_request (validated) | 
+| `LocalShellCallItemParam` | no | no | provider_request (validated) | 
+| `LocalShellCallOutputItemParam` | no | no | provider_request (validated) | 
+| `MCPApprovalRequestItemParam` | no | no | provider_request (validated) | 
+| `MCPApprovalResponseItemParam` | no | no | provider_request (validated) | 
+| `ReasoningItemParam` | yes | no | provider_request (validated) | 
+| `SystemMessageItemParam` | yes | no | provider_request (validated) | 
+| `UserMessageItemParam` | yes | no | provider_request (validated) | 
+| `WebSearchCallItemParam` | no | no | provider_request (validated) | 
 
 ### Other schemas
 | schema | bundled | validated | status |
@@ -566,7 +566,7 @@ Legend
 | `InputTextContentParam` | yes | no | pending |
 | `InputTokensDetails` | yes | yes | pending |
 | `ItemListResource` | no | no | pending |
-| `ItemReferenceParam` | yes | no | pending |
+| `ItemReferenceParam` | yes | no | provider_request (validated) | 
 | `JsonObjectResponseFormat` | yes | yes | pending |
 | `JsonSchemaResponseFormat` | yes | yes | pending |
 | `KeyPressAction` | no | no | pending |
