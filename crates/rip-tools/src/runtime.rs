@@ -59,6 +59,7 @@ pub type ToolHandler = Arc<dyn Fn(ToolInvocation) -> BoxFuture<'static, ToolOutp
 #[derive(Default)]
 pub struct ToolRegistry {
     tools: Mutex<HashMap<String, ToolHandler>>,
+    aliases: Mutex<HashMap<String, String>>,
 }
 
 impl ToolRegistry {
@@ -67,9 +68,22 @@ impl ToolRegistry {
         tools.insert(name.into(), handler);
     }
 
+    pub fn register_alias(&self, alias: impl Into<String>, target: impl Into<String>) {
+        let mut aliases = self.aliases.lock().expect("tool alias mutex");
+        aliases.insert(alias.into(), target.into());
+    }
+
     pub fn get(&self, name: &str) -> Option<ToolHandler> {
         let tools = self.tools.lock().expect("tool registry mutex");
-        tools.get(name).cloned()
+        if let Some(handler) = tools.get(name) {
+            return Some(handler.clone());
+        }
+        drop(tools);
+        let aliases = self.aliases.lock().expect("tool alias mutex");
+        let target = aliases.get(name)?.clone();
+        drop(aliases);
+        let tools = self.tools.lock().expect("tool registry mutex");
+        tools.get(&target).cloned()
     }
 }
 
@@ -246,6 +260,29 @@ mod tests {
             events.last().map(|event| &event.kind),
             Some(EventKind::ToolEnded { .. })
         ));
+    }
+
+    #[tokio::test]
+    async fn alias_resolves_to_target() {
+        let registry = Arc::new(ToolRegistry::default());
+        registry.register(
+            "bash",
+            Arc::new(|_invocation| {
+                Box::pin(async move { ToolOutput::success(vec!["ok".to_string()]) })
+            }),
+        );
+        registry.register_alias("shell", "bash");
+
+        let handler = registry.get("shell").expect("alias");
+        let output = handler(ToolInvocation {
+            name: "shell".to_string(),
+            args: serde_json::json!({}),
+            timeout_ms: None,
+        })
+        .await;
+
+        assert_eq!(output.exit_code, 0);
+        assert_eq!(output.stdout, vec!["ok".to_string()]);
     }
 
     #[tokio::test]

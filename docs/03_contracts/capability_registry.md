@@ -109,7 +109,7 @@ Rules
 ## Tools & Tooling
 | id | v | phase | cli_i | cli_h | server | sdk | tui | mcp | intent |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| tool.builtin_files | v1 | P1 | planned | planned | planned | planned | planned | planned | Built-in file tools + shell tool. |
+| tool.builtin_files | v1 | P1 | planned | planned | planned | planned | planned | planned | Built-in file tools + bash tool (shell alias). |
 | tool.registry | v1 | P1 | planned | planned | planned | planned | planned | planned | Tool registry with dynamic enable/disable. |
 | tool.toolbox | v1 | P1 | planned | planned | planned | planned | planned | planned | Toolboxes discovered from directory. |
 | tool.schema | v1 | P1 | planned | planned | planned | planned | planned | planned | Tool schemas for structured I/O. |

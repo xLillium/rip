@@ -950,6 +950,7 @@ async fn shell_accepts_cwd() {
 async fn shell_reports_missing_program() {
     let _lock = env_lock().lock().await;
     let _guard = EnvGuard::set("SHELL", "/nope");
+    let _path_guard = EnvGuard::set("PATH", "");
 
     let dir = tempdir().expect("tmp");
     let root = dir.path();
@@ -1035,6 +1036,7 @@ async fn bash_rejects_invalid_cwd() {
 async fn bash_reports_missing_program() {
     let _lock = env_lock().lock().await;
     let _guard = EnvGuard::set("PATH", "");
+    let _shell_guard = EnvGuard::set("SHELL", "/nope");
 
     let dir = tempdir().expect("tmp");
     let root = dir.path();

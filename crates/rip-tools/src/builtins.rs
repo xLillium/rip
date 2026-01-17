@@ -92,15 +92,6 @@ pub fn register_builtin_tools(registry: &ToolRegistry, config: BuiltinToolConfig
         }),
     );
 
-    let shell_config = config.clone();
-    registry.register(
-        "shell",
-        std::sync::Arc::new(move |invocation| {
-            let cfg = shell_config.clone();
-            Box::pin(run_shell(invocation, cfg))
-        }),
-    );
-
     let bash_config = config;
     registry.register(
         "bash",
@@ -109,6 +100,7 @@ pub fn register_builtin_tools(registry: &ToolRegistry, config: BuiltinToolConfig
             Box::pin(run_bash(invocation, cfg))
         }),
     );
+    registry.register_alias("shell", "bash");
 }
 
 #[derive(Deserialize)]
@@ -499,28 +491,66 @@ struct ShellArgs {
     max_bytes: Option<usize>,
 }
 
-async fn run_shell(invocation: ToolInvocation, config: BuiltinToolConfig) -> ToolOutput {
+async fn run_bash(invocation: ToolInvocation, config: BuiltinToolConfig) -> ToolOutput {
     let args: ShellArgs = match parse_args(invocation.args) {
         Ok(args) => args,
         Err(err) => return err,
     };
 
     let max_bytes = args.max_bytes.unwrap_or(config.max_bytes);
-    let (program, mut program_args) = default_shell_program();
-
-    program_args.push(args.command);
-
-    let mut cmd = Command::new(program);
-    cmd.args(program_args);
-    if let Some(cwd) = args.cwd {
-        match resolve_path(&config.workspace_root, &cwd) {
+    let mut cmd = Command::new("bash");
+    cmd.arg("-c").arg(&args.command);
+    if let Some(cwd) = args.cwd.as_deref() {
+        match resolve_path(&config.workspace_root, cwd) {
             Ok(path) => {
                 cmd.current_dir(path);
             }
             Err(err) => return ToolOutput::failure(vec![err]),
         }
     }
-    if let Some(envs) = args.env {
+    if let Some(envs) = &args.env {
+        cmd.envs(envs);
+    }
+
+    match cmd.output() {
+        Ok(output) => {
+            let stdout = split_output(output.stdout, max_bytes);
+            let stderr = split_output(output.stderr, max_bytes);
+            ToolOutput {
+                stdout,
+                stderr,
+                exit_code: output.status.code().unwrap_or(1),
+                artifacts: None,
+            }
+        }
+        Err(err) => {
+            if err.kind() == std::io::ErrorKind::NotFound {
+                return run_shell_with_args(&args, &config, max_bytes);
+            }
+            ToolOutput::failure(vec![format!("bash failed: {err}")])
+        }
+    }
+}
+
+fn run_shell_with_args(
+    args: &ShellArgs,
+    config: &BuiltinToolConfig,
+    max_bytes: usize,
+) -> ToolOutput {
+    let (program, mut program_args) = default_shell_program();
+    program_args.push(args.command.clone());
+
+    let mut cmd = Command::new(program);
+    cmd.args(program_args);
+    if let Some(cwd) = args.cwd.as_deref() {
+        match resolve_path(&config.workspace_root, cwd) {
+            Ok(path) => {
+                cmd.current_dir(path);
+            }
+            Err(err) => return ToolOutput::failure(vec![err]),
+        }
+    }
+    if let Some(envs) = &args.env {
         cmd.envs(envs);
     }
 
@@ -536,42 +566,6 @@ async fn run_shell(invocation: ToolInvocation, config: BuiltinToolConfig) -> Too
             }
         }
         Err(err) => ToolOutput::failure(vec![format!("shell failed: {err}")]),
-    }
-}
-
-async fn run_bash(invocation: ToolInvocation, config: BuiltinToolConfig) -> ToolOutput {
-    let args: ShellArgs = match parse_args(invocation.args) {
-        Ok(args) => args,
-        Err(err) => return err,
-    };
-
-    let max_bytes = args.max_bytes.unwrap_or(config.max_bytes);
-    let mut cmd = Command::new("bash");
-    cmd.arg("-c").arg(args.command);
-    if let Some(cwd) = args.cwd {
-        match resolve_path(&config.workspace_root, &cwd) {
-            Ok(path) => {
-                cmd.current_dir(path);
-            }
-            Err(err) => return ToolOutput::failure(vec![err]),
-        }
-    }
-    if let Some(envs) = args.env {
-        cmd.envs(envs);
-    }
-
-    match cmd.output() {
-        Ok(output) => {
-            let stdout = split_output(output.stdout, max_bytes);
-            let stderr = split_output(output.stderr, max_bytes);
-            ToolOutput {
-                stdout,
-                stderr,
-                exit_code: output.status.code().unwrap_or(1),
-                artifacts: None,
-            }
-        }
-        Err(err) => ToolOutput::failure(vec![format!("bash failed: {err}")]),
     }
 }
 

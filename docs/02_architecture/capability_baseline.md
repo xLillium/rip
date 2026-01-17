@@ -65,7 +65,7 @@ Execution Modes
 - Structured output using a JSON Schema.
 
 Tools & Tooling
-- Built-in file tools (read/write/edit/grep/find/ls) and shell tool.
+- Built-in file tools (read/write/edit/grep/find/ls) and bash tool (shell alias).
 - Tool registry with dynamic enable/disable at runtime.
 - Toolboxes: executable tools discovered from a directory.
 - Tool schemas for structured inputs/outputs.

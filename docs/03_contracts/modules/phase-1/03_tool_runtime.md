@@ -2,6 +2,7 @@
 
 Summary
 - Executes tools with resource limits and streaming outputs.
+- Tool registry may expose aliases for compatibility (e.g., `shell` -> `bash`).
 
 Inputs
 - Tool invocation events (name, args, budget).
