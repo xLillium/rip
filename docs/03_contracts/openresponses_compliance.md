@@ -7,6 +7,7 @@ Summary
 - Streaming event schemas: 58 (from `temp/openresponses/schema/paths/responses.json`).
 - Input item variants: 25 (from `ItemParam.json`).
 - Output item variants: 23 (from `ItemField.json`).
+- Inventory artifacts: `temp/docs/openresponses/schema_inventory.json` (full schema + variant counts) and `temp/docs/openresponses/event_types.json` (SSE event type map).
 
 Sources reviewed
 - `temp/openresponses/README.md`
@@ -21,6 +22,8 @@ Sources reviewed
 - `temp/openresponses/schema/openapi_filter_manifest.yaml`
 - `temp/openresponses/schema/paths/responses.json`
 - `temp/openresponses/schema/components/schemas/*.json`
+- `temp/docs/openresponses/schema_inventory.json` (generated)
+- `temp/docs/openresponses/event_types.json` (generated)
 
 Mapping rules (Phase 1)
 - All OpenResponses SSE events map to `provider_event` frames with full payload fidelity.
@@ -33,6 +36,7 @@ Implementation status (current)
 - Tool schema validation is available for all `ResponsesToolParam` and `ToolChoiceParam` variants using manual required-field checks; bundled OpenAPI only includes function tool variants.
 - Input item variants are not yet mapped to internal request frames (pending).
 - ItemParam validation covers all input variants using manual required-field checks (message role/item reference handling included); internal request-frame mapping is still pending.
+- Split schema inventory and SSE event type map captured in `temp/docs/openresponses/` and reflected in the tables below.
 - Requests are JSON-only per spec; form-encoded bodies are not supported (ADR-0002).
 - Bundled OpenAPI schema currently includes 102 component schemas; the split OpenResponses schema defines 412 component schemas. Missing schemas are tracked in the checklist.
 - Split schemas + additive patches are authoritative; the filter manifest represents a reduced allowlist and is not a compliance target.
@@ -316,7 +320,7 @@ Doc discrepancies (resolved)
 | `reasoning` | `ReasoningItemParam.json` | provider_request (validated; internal mapping pending) |
 | `shell_call` | `FunctionShellCallItemParam.json` | provider_request (validated; internal mapping pending) |
 | `shell_call_output` | `FunctionShellCallOutputItemParam.json` | provider_request (validated; internal mapping pending) |
-| `unknown` | `ItemReferenceParam.json` | provider_request (validated; internal mapping pending) |
+| `item_reference` | `ItemReferenceParam.json` | provider_request (validated; internal mapping pending) |
 | `web_search_call` | `WebSearchCallItemParam.json` | provider_request (validated; internal mapping pending) |
 
 ## Output item variants

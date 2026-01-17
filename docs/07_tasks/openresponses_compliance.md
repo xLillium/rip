@@ -9,6 +9,7 @@ Progress log
 - 2026-01-17: Verified schema index covers all 412 split components; added additive patch schemas (`InputVideoContent`, `JsonSchemaResponseFormatParam`, `TextFormatParam`) to checklist.
 - 2026-01-17: Implemented full tool/tool_choice variant validation + builders; checked off related schemas in the task tracker.
 - 2026-01-17: Implemented manual validation for all input item variants (request-side); internal frame mapping still pending so checklist remains open for those items.
+- 2026-01-17: Generated split schema inventory + SSE event type map in `temp/docs/openresponses/` and reconciled compliance tables to match the split schema lists.
 
 ## Docs review checklist
 - [x] Review `temp/openresponses/README.md` and capture any mapping requirements in `docs/03_contracts/openresponses_compliance.md`.
@@ -342,6 +343,7 @@ Progress log
 
 ### Output item fields
 - [ ] `ItemField` mapped and validated.
+  - Output variant schemas are tracked in the schema checklist below (`Message`, `FunctionCall`, `CustomToolCall`, etc.).
 
 ### Request-related schemas
 - [ ] `CreateResponseBody` mapped and validated.
