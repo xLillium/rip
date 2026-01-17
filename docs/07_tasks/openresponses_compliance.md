@@ -14,7 +14,7 @@ Summary
 - [x] Review `temp/openresponses/src/pages/governance.mdx` and capture any mapping requirements in `docs/03_contracts/openresponses_compliance.md`.
 
 ## Open issues
-- [ ] Resolve request body content-type conflict (`application/json` MUST vs `application/x-www-form-urlencoded` allowed).
+- [x] Resolve request body content-type conflict (`application/json` MUST vs `application/x-www-form-urlencoded` allowed). Decision: JSON-only (ADR-0002).
 
 ## Schema checklist (all components)
 ### Error schemas

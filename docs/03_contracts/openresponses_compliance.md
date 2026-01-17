@@ -29,8 +29,10 @@ Mapping rules (Phase 1)
 
 Implementation status (current)
 - Provider adapter validates streaming events and embedded `response` objects against the bundled OpenAPI schema (`schemas/openresponses/openapi.json`).
-- Request bodies are not yet validated; CreateResponseBody fields are mapped only when provider request building is implemented.
+- Provider request builder validates CreateResponseBody payloads (errors captured; payload preserved); request sending is not wired yet.
 - Input item variants are not yet mapped to internal request frames (pending).
+- ItemParam validation is available for request assembly using per-variant checks (jsonschema rejects the oneOf with multiple message roles); unknown item types still require raw passthrough.
+- Requests are JSON-only per spec; form-encoded bodies are not supported (ADR-0002).
 - Bundled OpenAPI schema currently includes 102 component schemas; the split OpenResponses schema defines 412 component schemas. Missing schemas are tracked in the checklist.
 
 Doc review notes (normative requirements)
@@ -62,8 +64,8 @@ Compliance (`temp/openresponses/src/pages/compliance.mdx`)
 README/index/changelog/governance
 - High-level positioning and project governance; no additional protocol requirements.
 
-Doc discrepancies to resolve
-- Spec says request bodies MUST be `application/json`, while reference allows `application/x-www-form-urlencoded`. Decide canonical behavior and document.
+Doc discrepancies (resolved)
+- Spec says request bodies MUST be `application/json`, while reference allows `application/x-www-form-urlencoded`. Decision: enforce JSON-only (ADR-0002).
 
 ## CreateResponseBody fields
 | field | required |
@@ -265,7 +267,7 @@ This list is exhaustive and drives the task tracker in `docs/07_tasks/openrespon
 
 Legend
 - `bundled`: schema is present in `schemas/openresponses/openapi.json` (used for current validation).
-- `validated`: schema is reachable from streaming-event or ResponseResource validation in the bundled OpenAPI.
+- `validated`: schema is reachable from streaming-event or ResponseResource validation in the bundled OpenAPI (request validation is noted in `status`).
 - `status`: mapping status in current codebase.
 
 ### Error schemas
@@ -296,7 +298,7 @@ Legend
 | `FunctionShellCallItemParam` | no | no | pending |
 | `FunctionShellCallOutputItemParam` | no | no | pending |
 | `ImageGenCallItemParam` | no | no | pending |
-| `ItemParam` | yes | no | pending |
+| `ItemParam` | yes | no | provider_request (validated) |
 | `LocalShellCallItemParam` | no | no | pending |
 | `LocalShellCallOutputItemParam` | no | no | pending |
 | `MCPApprovalRequestItemParam` | no | no | pending |
@@ -596,7 +598,7 @@ Legend
 ### Request-related schemas
 | schema | bundled | validated | status |
 | --- | --- | --- | --- |
-| `CreateResponseBody` | yes | no | pending |
+| `CreateResponseBody` | yes | no | provider_request (validated) |
 
 ### Response-related schemas
 | schema | bundled | validated | status |
