@@ -1,5 +1,6 @@
 use rip_provider_openresponses::{
-    CreateResponseBuilder, CreateResponsePayload, ItemParam, ToolChoiceParam, ToolParam,
+    CreateResponseBuilder, CreateResponsePayload, ItemParam, SpecificToolChoiceParam,
+    ToolChoiceParam, ToolChoiceValue, ToolParam,
 };
 use serde_json::json;
 
@@ -60,6 +61,31 @@ fn tool_param_function_is_valid() {
 }
 
 #[test]
+fn tool_param_variants_are_valid() {
+    let tools = vec![
+        ToolParam::code_interpreter("cntr_123"),
+        ToolParam::custom("custom"),
+        ToolParam::web_search(),
+        ToolParam::web_search_2025_08_26(),
+        ToolParam::web_search_ga(),
+        ToolParam::web_search_preview(),
+        ToolParam::web_search_preview_2025_03_11(),
+        ToolParam::image_generation(),
+        ToolParam::mcp("srv"),
+        ToolParam::file_search(vec!["vs_1".to_string()]),
+        ToolParam::computer_preview(1024, 768, "linux"),
+        ToolParam::computer_use_preview(800, 600, "browser"),
+        ToolParam::local_shell(),
+        ToolParam::shell(),
+        ToolParam::apply_patch(),
+    ];
+
+    for tool in tools {
+        assert!(tool.errors().is_empty());
+    }
+}
+
+#[test]
 fn tool_param_invalid_reports_errors() {
     let tool = ToolParam::new(json!({ "type": "bogus" }));
     assert!(!tool.errors().is_empty());
@@ -73,6 +99,28 @@ fn tool_choice_specific_function_is_valid() {
 }
 
 #[test]
+fn tool_choice_specific_variants_are_valid() {
+    let choices = vec![
+        ToolChoiceParam::specific_file_search(),
+        ToolChoiceParam::specific_web_search(),
+        ToolChoiceParam::specific_web_search_preview(),
+        ToolChoiceParam::specific_image_generation(),
+        ToolChoiceParam::specific_computer_preview(),
+        ToolChoiceParam::specific_computer_use_preview(),
+        ToolChoiceParam::specific_code_interpreter(),
+        ToolChoiceParam::specific_local_shell(),
+        ToolChoiceParam::specific_shell(),
+        ToolChoiceParam::specific_apply_patch(),
+        ToolChoiceParam::specific_custom("custom"),
+        ToolChoiceParam::specific_mcp("srv"),
+    ];
+
+    for choice in choices {
+        assert!(choice.errors().is_empty());
+    }
+}
+
+#[test]
 fn tool_choice_value_variants_roundtrip() {
     let none = ToolChoiceParam::none();
     assert_eq!(none.value(), &json!("none"));
@@ -80,6 +128,18 @@ fn tool_choice_value_variants_roundtrip() {
     assert_eq!(required.value(), &json!("required"));
     let raw = ToolChoiceParam::new(json!(true));
     assert!(!raw.errors().is_empty());
+}
+
+#[test]
+fn tool_choice_allowed_tools_with_mode_is_valid() {
+    let choice = ToolChoiceParam::allowed_tools_with_mode(
+        vec![
+            SpecificToolChoiceParam::function("echo"),
+            SpecificToolChoiceParam::web_search(),
+        ],
+        Some(ToolChoiceValue::Required),
+    );
+    assert!(choice.errors().is_empty());
 }
 
 #[test]

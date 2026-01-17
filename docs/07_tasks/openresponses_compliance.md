@@ -7,6 +7,7 @@ Summary
 Progress log
 - 2026-01-17: Roadmap gate added (`docs/07_tasks/roadmap.md`). Tool/tool_choice request validation + builder support landed (commit `c8946dd`); split schema notes captured in `temp/docs/openresponses/`.
 - 2026-01-17: Verified schema index covers all 412 split components; added additive patch schemas (`InputVideoContent`, `JsonSchemaResponseFormatParam`, `TextFormatParam`) to checklist.
+- 2026-01-17: Implemented full tool/tool_choice variant validation + builders; checked off related schemas in the task tracker.
 
 ## Docs review checklist
 - [x] Review `temp/openresponses/README.md` and capture any mapping requirements in `docs/03_contracts/openresponses_compliance.md`.
@@ -56,7 +57,7 @@ Progress log
 - [ ] `WebSearchCallItemParam` mapped and validated.
 
 ### Other schemas
-- [ ] `AllowedToolsParam` mapped and validated.
+- [x] `AllowedToolsParam` mapped and validated.
 - [ ] `Annotation` mapped and validated.
 - [ ] `ApiSourceParam` mapped and validated.
 - [ ] `ApplyPatchCallOutputStatus` mapped and validated.
@@ -285,19 +286,19 @@ Progress log
 - [ ] `ScrollParam` mapped and validated.
 - [ ] `SearchContextSize` mapped and validated.
 - [ ] `ServiceTierEnum` mapped and validated.
-- [ ] `SpecificApplyPatchParam` mapped and validated.
-- [ ] `SpecificCodeInterpreterParam` mapped and validated.
-- [ ] `SpecificComputerParam` mapped and validated.
-- [ ] `SpecificComputerPreviewParam` mapped and validated.
-- [ ] `SpecificFileSearchParam` mapped and validated.
-- [ ] `SpecificFunctionParam` mapped and validated.
-- [ ] `SpecificFunctionShellParam` mapped and validated.
-- [ ] `SpecificImageGenParam` mapped and validated.
-- [ ] `SpecificLocalShellParam` mapped and validated.
-- [ ] `SpecificMCPFunctionParam` mapped and validated.
-- [ ] `SpecificToolChoiceParam` mapped and validated.
-- [ ] `SpecificWebSearchParam` mapped and validated.
-- [ ] `SpecificWebSearchPreviewParam` mapped and validated.
+- [x] `SpecificApplyPatchParam` mapped and validated.
+- [x] `SpecificCodeInterpreterParam` mapped and validated.
+- [x] `SpecificComputerParam` mapped and validated.
+- [x] `SpecificComputerPreviewParam` mapped and validated.
+- [x] `SpecificFileSearchParam` mapped and validated.
+- [x] `SpecificFunctionParam` mapped and validated.
+- [x] `SpecificFunctionShellParam` mapped and validated.
+- [x] `SpecificImageGenParam` mapped and validated.
+- [x] `SpecificLocalShellParam` mapped and validated.
+- [x] `SpecificMCPFunctionParam` mapped and validated.
+- [x] `SpecificToolChoiceParam` mapped and validated.
+- [x] `SpecificWebSearchParam` mapped and validated.
+- [x] `SpecificWebSearchPreviewParam` mapped and validated.
 - [ ] `StreamOptionsParam` mapped and validated.
 - [ ] `SummaryTextContent` mapped and validated.
 - [ ] `TextContent` mapped and validated.
@@ -307,8 +308,8 @@ Progress log
 - [ ] `TextFormatParam` mapped and validated.
 - [ ] `TokenCountsBody` mapped and validated.
 - [ ] `TokenCountsResource` mapped and validated.
-- [ ] `ToolChoiceParam` mapped and validated.
-- [ ] `ToolChoiceValueEnum` mapped and validated.
+- [x] `ToolChoiceParam` mapped and validated.
+- [x] `ToolChoiceValueEnum` mapped and validated.
 - [ ] `TopLogProb` mapped and validated.
 - [ ] `TruncationEnum` mapped and validated.
 - [ ] `TypeAction` mapped and validated.
@@ -335,8 +336,8 @@ Progress log
 - [ ] `WebSearchCallActionSearch` mapped and validated.
 - [ ] `WebSearchCallActionSearchParam` mapped and validated.
 - [ ] `WebSearchCallStatus` mapped and validated.
-- [ ] `WebSearchPreviewToolParam_2025_03_11Param` mapped and validated.
-- [ ] `WebSearchToolParam_2025_08_14Param` mapped and validated.
+- [x] `WebSearchPreviewToolParam_2025_03_11Param` mapped and validated.
+- [x] `WebSearchToolParam_2025_08_14Param` mapped and validated.
 
 ### Output item fields
 - [ ] `ItemField` mapped and validated.
@@ -413,41 +414,41 @@ Progress log
 - [ ] `AllowedToolChoice` mapped and validated.
 - [ ] `ApplyPatchTool` mapped and validated.
 - [ ] `ApplyPatchToolChoice` mapped and validated.
-- [ ] `ApplyPatchToolParam` mapped and validated.
+- [x] `ApplyPatchToolParam` mapped and validated.
 - [ ] `AutoCodeInterpreterToolParam` mapped and validated.
 - [ ] `CodeInterpreterToolChoice` mapped and validated.
-- [ ] `CodeInterpreterToolParam` mapped and validated.
+- [x] `CodeInterpreterToolParam` mapped and validated.
 - [ ] `ComputerToolChoice` mapped and validated.
-- [ ] `ComputerToolParam` mapped and validated.
+- [x] `ComputerToolParam` mapped and validated.
 - [ ] `ComputerUsePreviewTool` mapped and validated.
-- [ ] `ComputerUsePreviewToolParam` mapped and validated.
+- [x] `ComputerUsePreviewToolParam` mapped and validated.
 - [ ] `CustomTool` mapped and validated.
 - [ ] `CustomToolChoice` mapped and validated.
-- [ ] `CustomToolParam` mapped and validated.
+- [x] `CustomToolParam` mapped and validated.
 - [ ] `FileSearchTool` mapped and validated.
 - [ ] `FileSearchToolChoice` mapped and validated.
-- [ ] `FileSearchToolParam` mapped and validated.
+- [x] `FileSearchToolParam` mapped and validated.
 - [ ] `FunctionShellTool` mapped and validated.
 - [ ] `FunctionShellToolChoice` mapped and validated.
-- [ ] `FunctionShellToolParam` mapped and validated.
+- [x] `FunctionShellToolParam` mapped and validated.
 - [ ] `FunctionTool` mapped and validated.
 - [ ] `FunctionToolChoice` mapped and validated.
-- [ ] `FunctionToolParam` mapped and validated.
+- [x] `FunctionToolParam` mapped and validated.
 - [ ] `ImageGenTool` mapped and validated.
 - [ ] `ImageGenToolChoice` mapped and validated.
-- [ ] `ImageGenToolParam` mapped and validated.
+- [x] `ImageGenToolParam` mapped and validated.
 - [ ] `LocalShellToolChoice` mapped and validated.
-- [ ] `LocalShellToolParam` mapped and validated.
+- [x] `LocalShellToolParam` mapped and validated.
 - [ ] `MCPListToolsTool` mapped and validated.
 - [ ] `MCPTool` mapped and validated.
 - [ ] `MCPToolChoice` mapped and validated.
-- [ ] `MCPToolParam` mapped and validated.
+- [x] `MCPToolParam` mapped and validated.
 - [ ] `MemoryToolParam` mapped and validated.
-- [ ] `ResponsesToolParam` mapped and validated.
-- [ ] `SpecificCustomToolParam` mapped and validated.
+- [x] `ResponsesToolParam` mapped and validated.
+- [x] `SpecificCustomToolParam` mapped and validated.
 - [ ] `Tool` mapped and validated.
-- [ ] `WebSearchGADeprecatedToolParam` mapped and validated.
+- [x] `WebSearchGADeprecatedToolParam` mapped and validated.
 - [ ] `WebSearchPreviewTool` mapped and validated.
-- [ ] `WebSearchPreviewToolParam` mapped and validated.
+- [x] `WebSearchPreviewToolParam` mapped and validated.
 - [ ] `WebSearchToolChoice` mapped and validated.
-- [ ] `WebSearchToolParam` mapped and validated.
+- [x] `WebSearchToolParam` mapped and validated.

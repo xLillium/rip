@@ -30,7 +30,7 @@ Mapping rules (Phase 1)
 Implementation status (current)
 - Provider adapter validates streaming events and embedded `response` objects against the bundled OpenAPI schema (`schemas/openresponses/openapi.json`).
 - Provider request builder validates CreateResponseBody payloads (errors captured; payload preserved); tool fields use per-variant validation to avoid jsonschema oneOf failures; request sending is not wired yet.
-- Tool schema validation is available for `ResponsesToolParam` and `ToolChoiceParam` using per-variant checks; bundled OpenAPI only includes function tool variants.
+- Tool schema validation is available for all `ResponsesToolParam` and `ToolChoiceParam` variants using manual required-field checks; bundled OpenAPI only includes function tool variants.
 - Input item variants are not yet mapped to internal request frames (pending).
 - ItemParam validation is available for request assembly using per-variant checks (jsonschema rejects the oneOf with multiple message roles); unknown item types still require raw passthrough.
 - Requests are JSON-only per spec; form-encoded bodies are not supported (ADR-0002).
@@ -159,21 +159,21 @@ Doc discrepancies (resolved)
 | tool type | schema | request validation |
 | --- | --- | --- |
 | `function` | `FunctionToolParam.json` | implemented |
-| `code_interpreter` | `CodeInterpreterToolParam.json` | pending |
-| `custom` | `CustomToolParam.json` | pending |
-| `web_search` | `WebSearchToolParam.json` | pending |
-| `web_search_2025_08_26` | `WebSearchToolParam_2025_08_14Param.json` | pending |
-| `web_search_ga` | `WebSearchGADeprecatedToolParam.json` | pending |
-| `web_search_preview` | `WebSearchPreviewToolParam.json` | pending |
-| `web_search_preview_2025_03_11` | `WebSearchPreviewToolParam_2025_03_11Param.json` | pending |
-| `image_generation` | `ImageGenToolParam.json` | pending |
-| `mcp` | `MCPToolParam.json` | pending |
-| `file_search` | `FileSearchToolParam.json` | pending |
-| `computer-preview` | `ComputerToolParam.json` | pending |
-| `computer_use_preview` | `ComputerUsePreviewToolParam.json` | pending |
-| `local_shell` | `LocalShellToolParam.json` | pending |
-| `shell` | `FunctionShellToolParam.json` | pending |
-| `apply_patch` | `ApplyPatchToolParam.json` | pending |
+| `code_interpreter` | `CodeInterpreterToolParam.json` | implemented |
+| `custom` | `CustomToolParam.json` | implemented |
+| `web_search` | `WebSearchToolParam.json` | implemented |
+| `web_search_2025_08_26` | `WebSearchToolParam_2025_08_14Param.json` | implemented |
+| `web_search_ga` | `WebSearchGADeprecatedToolParam.json` | implemented |
+| `web_search_preview` | `WebSearchPreviewToolParam.json` | implemented |
+| `web_search_preview_2025_03_11` | `WebSearchPreviewToolParam_2025_03_11Param.json` | implemented |
+| `image_generation` | `ImageGenToolParam.json` | implemented |
+| `mcp` | `MCPToolParam.json` | implemented |
+| `file_search` | `FileSearchToolParam.json` | implemented |
+| `computer-preview` | `ComputerToolParam.json` | implemented |
+| `computer_use_preview` | `ComputerUsePreviewToolParam.json` | implemented |
+| `local_shell` | `LocalShellToolParam.json` | implemented |
+| `shell` | `FunctionShellToolParam.json` | implemented |
+| `apply_patch` | `ApplyPatchToolParam.json` | implemented |
 
 ### Tool param required fields
 | schema | required fields | notes |
@@ -199,25 +199,25 @@ Doc discrepancies (resolved)
 | ToolChoiceParam variant | schema | status |
 | --- | --- | --- |
 | value enum | `ToolChoiceValueEnum.json` | implemented |
-| allowed tools | `AllowedToolsParam.json` | partial (function-only) |
-| specific tool | `SpecificToolChoiceParam.json` | partial (function-only) |
+| allowed tools | `AllowedToolsParam.json` | implemented |
+| specific tool | `SpecificToolChoiceParam.json` | implemented |
 
 ### Specific tool choices (SpecificToolChoiceParam)
 | tool type | schema | required fields | status |
 | --- | --- | --- | --- |
-| `file_search` | `SpecificFileSearchParam.json` | `type` | pending |
-| `web_search` | `SpecificWebSearchParam.json` | `type` | pending |
-| `web_search_preview` | `SpecificWebSearchPreviewParam.json` | `type` | pending |
-| `image_generation` | `SpecificImageGenParam.json` | `type` | pending |
-| `computer-preview` | `SpecificComputerParam.json` | `type` | pending |
-| `computer_use_preview` | `SpecificComputerPreviewParam.json` | `type` | pending |
-| `code_interpreter` | `SpecificCodeInterpreterParam.json` | `type` | pending |
+| `file_search` | `SpecificFileSearchParam.json` | `type` | implemented |
+| `web_search` | `SpecificWebSearchParam.json` | `type` | implemented |
+| `web_search_preview` | `SpecificWebSearchPreviewParam.json` | `type` | implemented |
+| `image_generation` | `SpecificImageGenParam.json` | `type` | implemented |
+| `computer-preview` | `SpecificComputerParam.json` | `type` | implemented |
+| `computer_use_preview` | `SpecificComputerPreviewParam.json` | `type` | implemented |
+| `code_interpreter` | `SpecificCodeInterpreterParam.json` | `type` | implemented |
 | `function` | `SpecificFunctionParam.json` | `type`, `name` | implemented |
-| `mcp` | `SpecificMCPFunctionParam.json` | `type`, `server_label` | pending |
-| `local_shell` | `SpecificLocalShellParam.json` | `type` | pending |
-| `shell` | `SpecificFunctionShellParam.json` | `type` | pending |
-| `custom` | `SpecificCustomToolParam.json` | `type`, `name` | pending |
-| `apply_patch` | `SpecificApplyPatchParam.json` | `type` | pending |
+| `mcp` | `SpecificMCPFunctionParam.json` | `type`, `server_label` | implemented |
+| `local_shell` | `SpecificLocalShellParam.json` | `type` | implemented |
+| `shell` | `SpecificFunctionShellParam.json` | `type` | implemented |
+| `custom` | `SpecificCustomToolParam.json` | `type`, `name` | implemented |
+| `apply_patch` | `SpecificApplyPatchParam.json` | `type` | implemented |
 
 ## Error schemas
 | schema | required fields | notes |
@@ -623,19 +623,19 @@ Legend
 | `ScrollParam` | no | no | pending |
 | `SearchContextSize` | no | no | pending |
 | `ServiceTierEnum` | yes | no | pending |
-| `SpecificApplyPatchParam` | no | no | pending |
-| `SpecificCodeInterpreterParam` | no | no | pending |
-| `SpecificComputerParam` | no | no | pending |
-| `SpecificComputerPreviewParam` | no | no | pending |
-| `SpecificFileSearchParam` | no | no | pending |
+| `SpecificApplyPatchParam` | no | no | provider_request (validated) | 
+| `SpecificCodeInterpreterParam` | no | no | provider_request (validated) | 
+| `SpecificComputerParam` | no | no | provider_request (validated) | 
+| `SpecificComputerPreviewParam` | no | no | provider_request (validated) | 
+| `SpecificFileSearchParam` | no | no | provider_request (validated) | 
 | `SpecificFunctionParam` | yes | no | pending |
-| `SpecificFunctionShellParam` | no | no | pending |
-| `SpecificImageGenParam` | no | no | pending |
-| `SpecificLocalShellParam` | no | no | pending |
-| `SpecificMCPFunctionParam` | no | no | pending |
+| `SpecificFunctionShellParam` | no | no | provider_request (validated) | 
+| `SpecificImageGenParam` | no | no | provider_request (validated) | 
+| `SpecificLocalShellParam` | no | no | provider_request (validated) | 
+| `SpecificMCPFunctionParam` | no | no | provider_request (validated) | 
 | `SpecificToolChoiceParam` | yes | no | provider_request (validated) |
-| `SpecificWebSearchParam` | no | no | pending |
-| `SpecificWebSearchPreviewParam` | no | no | pending |
+| `SpecificWebSearchParam` | no | no | provider_request (validated) | 
+| `SpecificWebSearchPreviewParam` | no | no | provider_request (validated) | 
 | `StreamOptionsParam` | yes | no | pending |
 | `SummaryTextContent` | yes | yes | pending |
 | `TextContent` | yes | yes | pending |
@@ -672,8 +672,8 @@ Legend
 | `WebSearchCallActionSearch` | no | no | pending |
 | `WebSearchCallActionSearchParam` | no | no | pending |
 | `WebSearchCallStatus` | no | no | pending |
-| `WebSearchPreviewToolParam_2025_03_11Param` | no | no | pending |
-| `WebSearchToolParam_2025_08_14Param` | no | no | pending |
+| `WebSearchPreviewToolParam_2025_03_11Param` | no | no | provider_request (validated) | 
+| `WebSearchToolParam_2025_08_14Param` | no | no | provider_request (validated) | 
 
 ### Output item fields
 | schema | bundled | validated | status |
@@ -760,41 +760,41 @@ Legend
 | `AllowedToolChoice` | yes | yes | pending |
 | `ApplyPatchTool` | no | no | pending |
 | `ApplyPatchToolChoice` | no | no | pending |
-| `ApplyPatchToolParam` | no | no | pending |
+| `ApplyPatchToolParam` | no | no | provider_request (validated) | 
 | `AutoCodeInterpreterToolParam` | no | no | pending |
 | `CodeInterpreterToolChoice` | no | no | pending |
-| `CodeInterpreterToolParam` | no | no | pending |
+| `CodeInterpreterToolParam` | no | no | provider_request (validated) | 
 | `ComputerToolChoice` | no | no | pending |
-| `ComputerToolParam` | no | no | pending |
+| `ComputerToolParam` | no | no | provider_request (validated) | 
 | `ComputerUsePreviewTool` | no | no | pending |
-| `ComputerUsePreviewToolParam` | no | no | pending |
+| `ComputerUsePreviewToolParam` | no | no | provider_request (validated) | 
 | `CustomTool` | no | no | pending |
 | `CustomToolChoice` | no | no | pending |
-| `CustomToolParam` | no | no | pending |
+| `CustomToolParam` | no | no | provider_request (validated) | 
 | `FileSearchTool` | no | no | pending |
 | `FileSearchToolChoice` | no | no | pending |
-| `FileSearchToolParam` | no | no | pending |
+| `FileSearchToolParam` | no | no | provider_request (validated) | 
 | `FunctionShellTool` | no | no | pending |
 | `FunctionShellToolChoice` | no | no | pending |
-| `FunctionShellToolParam` | no | no | pending |
+| `FunctionShellToolParam` | no | no | provider_request (validated) | 
 | `FunctionTool` | yes | yes | pending |
 | `FunctionToolChoice` | yes | yes | pending |
 | `FunctionToolParam` | yes | no | provider_request (validated) |
 | `ImageGenTool` | no | no | pending |
 | `ImageGenToolChoice` | no | no | pending |
-| `ImageGenToolParam` | no | no | pending |
+| `ImageGenToolParam` | no | no | provider_request (validated) | 
 | `LocalShellToolChoice` | no | no | pending |
-| `LocalShellToolParam` | no | no | pending |
+| `LocalShellToolParam` | no | no | provider_request (validated) | 
 | `MCPListToolsTool` | no | no | pending |
 | `MCPTool` | no | no | pending |
 | `MCPToolChoice` | no | no | pending |
-| `MCPToolParam` | no | no | pending |
+| `MCPToolParam` | no | no | provider_request (validated) | 
 | `MemoryToolParam` | no | no | pending |
 | `ResponsesToolParam` | yes | no | provider_request (validated) |
-| `SpecificCustomToolParam` | no | no | pending |
+| `SpecificCustomToolParam` | no | no | provider_request (validated) | 
 | `Tool` | yes | yes | pending |
-| `WebSearchGADeprecatedToolParam` | no | no | pending |
+| `WebSearchGADeprecatedToolParam` | no | no | provider_request (validated) | 
 | `WebSearchPreviewTool` | no | no | pending |
-| `WebSearchPreviewToolParam` | no | no | pending |
+| `WebSearchPreviewToolParam` | no | no | provider_request (validated) | 
 | `WebSearchToolChoice` | no | no | pending |
-| `WebSearchToolParam` | no | no | pending |
+| `WebSearchToolParam` | no | no | provider_request (validated) | 
