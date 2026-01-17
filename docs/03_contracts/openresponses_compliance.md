@@ -58,6 +58,7 @@ Specification (`temp/openresponses/src/pages/specification.mdx`)
 - Extended streaming events MUST be prefixed with implementor slug and include `type` + `sequence_number`; clients MUST ignore unknown events safely.
 - Schema extensions MUST NOT change core semantics; extensions SHOULD be optional and documented.
 - Service tiers MAY exist; implementations SHOULD document supported tiers, behaviors, and quotas.
+- Reasoning items MAY expose raw `content`, `encrypted_content`, and/or `summary`; clients SHOULD treat `encrypted_content` as opaque.
 
 Reference (`temp/openresponses/src/pages/reference.mdx`)
 - `/v1/responses` request bodies are documented as JSON or form-encoded; response bodies as JSON or SSE.
@@ -173,6 +174,26 @@ Doc discrepancies (resolved)
 | `local_shell` | `LocalShellToolParam.json` | pending |
 | `shell` | `FunctionShellToolParam.json` | pending |
 | `apply_patch` | `ApplyPatchToolParam.json` | pending |
+
+### Tool param required fields
+| schema | required fields | notes |
+| --- | --- | --- |
+| `CodeInterpreterToolParam.json` | `type`, `container` | `container` is string or `AutoCodeInterpreterToolParam` |
+| `FunctionToolParam.json` | `type`, `name` |  |
+| `CustomToolParam.json` | `type`, `name` |  |
+| `WebSearchToolParam.json` | `type` |  |
+| `WebSearchToolParam_2025_08_14Param.json` | `type` |  |
+| `WebSearchGADeprecatedToolParam.json` | `type` |  |
+| `WebSearchPreviewToolParam.json` | `type` |  |
+| `WebSearchPreviewToolParam_2025_03_11Param.json` | `type` |  |
+| `ImageGenToolParam.json` | `type` |  |
+| `MCPToolParam.json` | `type`, `server_label` |  |
+| `FileSearchToolParam.json` | `type`, `vector_store_ids` |  |
+| `ComputerToolParam.json` | `type`, `display_width`, `display_height`, `environment` | `environment` is `ComputerEnvironment` |
+| `ComputerUsePreviewToolParam.json` | `type`, `display_width`, `display_height`, `environment` | `environment` is `ComputerEnvironment` |
+| `LocalShellToolParam.json` | `type` |  |
+| `FunctionShellToolParam.json` | `type` |  |
+| `ApplyPatchToolParam.json` | `type` |  |
 
 ## Tool choice variants
 | ToolChoiceParam variant | schema | status |

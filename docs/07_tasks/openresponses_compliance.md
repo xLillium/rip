@@ -6,6 +6,7 @@ Summary
 
 Progress log
 - 2026-01-17: Roadmap gate added (`docs/07_tasks/roadmap.md`). Tool/tool_choice request validation + builder support landed (commit `c8946dd`); split schema notes captured in `temp/docs/openresponses/`.
+- 2026-01-17: Verified schema index covers all 412 split components; added additive patch schemas (`InputVideoContent`, `JsonSchemaResponseFormatParam`, `TextFormatParam`) to checklist.
 
 ## Docs review checklist
 - [x] Review `temp/openresponses/README.md` and capture any mapping requirements in `docs/03_contracts/openresponses_compliance.md`.
